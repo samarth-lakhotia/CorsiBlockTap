@@ -15,7 +15,10 @@ class GameActivity:Activity(){
         setContentView(R.layout.game_page)
 
         viewManager = GridLayoutManager(this,5)
-        viewAdapter = GameAdapter(arrayOf("1","2","3","4","5","6","7","8","9","10", "11","12","13","14","15"))
+        var arr = Array(25){""}
+
+
+        viewAdapter = GameAdapter(arr)
 
         recyclerView = findViewById<RecyclerView>(R.id.corsi_grid).apply {
             setHasFixedSize(true)
