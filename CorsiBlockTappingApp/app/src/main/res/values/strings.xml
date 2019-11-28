@@ -4,4 +4,6 @@
     <string name="play_button">Play</string>
     <string name="corsi_grid">corsi_grid</string>
     <string name="start">Start</string>
+    <string name="record">Record</string>
+    <string name="done">Done</string>
 </resources>

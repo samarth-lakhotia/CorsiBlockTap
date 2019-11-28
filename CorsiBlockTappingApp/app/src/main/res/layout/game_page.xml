@@ -10,13 +10,36 @@
         android:layout_centerInParent="true"
         tools:itemCount="25"
         />
+<!--    <RelativeLayout-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:layout_below="@id/corsi_grid"-->
+<!--        android:layout_marginTop="30dp"-->
+<!--        android:layout_centerHorizontal="true">-->
 
-    <Button
-        android:id="@+id/start_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start"
-        android:layout_below="@id/corsi_grid"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"/>
+<!--        <Button-->
+<!--            android:id="@+id/start_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/start" />-->
+<!--        <Button-->
+<!--            android:id="@+id/done_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/done"-->
+<!--            android:visibility="gone"/>-->
+<!--        <Button-->
+<!--            android:id="@+id/record_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_toEndOf="@id/start_button"-->
+<!--            android:layout_toRightOf="@id/start_button"-->
+<!--            android:layout_marginLeft="30dp"-->
+<!--            android:text="@string/record"-->
+<!--            android:layout_marginStart="30dp"-->
+<!--            android:enabled="false"-->
+<!--            />-->
+<!--    </RelativeLayout>-->
+
 </RelativeLayout>

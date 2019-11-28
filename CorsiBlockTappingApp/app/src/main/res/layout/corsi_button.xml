@@ -2,8 +2,8 @@
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/corsi_button"
     style="@style/Widget.AppCompat.Button"
-    android:layout_width="65dp"
-    android:layout_height="65dp"
-    android:layout_margin="4dp">
-
-</Button>
+    android:layout_width="70dp"
+    android:layout_height="70dp"
+    android:layout_margin="4dp"
+    android:backgroundTint="@color/block_color_default"
+    android:backgroundTintMode="src_over" />

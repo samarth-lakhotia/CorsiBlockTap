@@ -14,18 +14,9 @@ class GameAdapter(private val dataset: Array<String>): RecyclerView.Adapter<Game
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     class GameViewHolder(val blockButton: Button) : RecyclerView.ViewHolder(blockButton){
         var clickedOn:Boolean
+        val bg = blockButton.backgroundTintList
         init {
             clickedOn = false
-            val bg = blockButton.background
-            blockButton.setOnClickListener {
-                clickedOn = !clickedOn
-                if(clickedOn) {
-                    blockButton.setBackgroundColor(Color.RED)
-                }
-                else{
-                    blockButton.background = bg
-                }
-            }
         }
 
     }
