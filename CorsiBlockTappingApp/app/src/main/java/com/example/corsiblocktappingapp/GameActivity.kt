@@ -8,9 +8,11 @@ import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.SystemClock
 import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Button
+import android.widget.Chronometer
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.get
@@ -37,6 +39,13 @@ class GameActivity : Activity() {
     private var numRounds=0
     private lateinit var rounds:ArrayList<TappingRound>
 
+    //Var for Timer
+    private lateinit var mTimerTextView: Chronometer
+    private lateinit var mTimer: Chronometer
+    private var mTimerRunning:Boolean = false
+    private var mTimerTerm:Long = 0
+    private var mTimerTotal:Long = 0
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +70,16 @@ class GameActivity : Activity() {
                 DialogInterface.BUTTON_NEUTRAL -> Toast.makeText(this,"Neutral/Cancel button clicked.",Toast.LENGTH_LONG).show()
             }
         }
+
+        //Timer Set Up
+        mTimerTextView = findViewById(R.id.total_time)
+        mTimerTextView.format = "Total Time: %s"
+        mTimerTextView.base = SystemClock.elapsedRealtime()
+        mTimer = findViewById(R.id.game_timer)
+        mTimer.format = "Time: %s"
+        mTimer.base = SystemClock.elapsedRealtime()
+
+
         rounds=ArrayList()
         // Set the alert dialog positive/yes button
         builder.setPositiveButton("YES",dialogClickListener)
@@ -136,6 +155,7 @@ class GameActivity : Activity() {
         unlockAllBlocks(true)
         resetAllBocks() // Reset All Blocks to default background for user to enter their pattern
         setRecordPatternListener()
+        startTimer()
     }
 
 
@@ -155,11 +175,16 @@ class GameActivity : Activity() {
             resetButton.isEnabled=true
             nextButton.isEnabled=false
         }
+
+        stopTimer(rounds.last().correctlyEntered)
     }
 
     fun resetGame(){
         currentNumberToRemember=NUMBER_TO_REMEMBER
         rounds.clear()
+
+        //Timer Clean
+        timerClean()
     }
     fun unlockAllBlocks(bool: Boolean = false) {
         for (i in 0 until viewAdapter.itemCount) {
@@ -249,5 +274,50 @@ class GameActivity : Activity() {
 
     fun getStoredBackground(view: Button): ColorStateList? {
         return (recyclerView.findContainingViewHolder(view) as GameAdapter.GameViewHolder).bg
+    }
+
+    //Timer Functions
+    fun startTimer() {
+        if (!mTimerRunning) {
+            mTimerTerm = 0
+            mTimer.base = SystemClock.elapsedRealtime() - mTimerTerm
+            mTimer.start()
+            mTimerRunning = true
+        }
+    }
+
+    //Timer Functions
+    fun stopTimer(correct:Boolean):Long {
+        if (mTimerRunning) {
+            mTimer.stop()
+            when(correct) {
+                true -> mTimerTerm = SystemClock.elapsedRealtime() - mTimer.base
+                false -> mTimerTerm = 0
+            }
+            mTimerRunning = false
+            mTimer.base = SystemClock.elapsedRealtime()
+        } else mTimerTerm = 0
+
+        //Timer Text View
+        mTimerTotal += mTimerTerm
+        timerTextViewF()
+
+        return mTimerTerm
+    }
+
+    //Timer TextView Function
+    fun timerTextViewF() {
+        mTimerTextView.base = SystemClock.elapsedRealtime() - mTimerTotal
+    }
+
+    //Timer Clean
+    fun timerClean() {
+        mTimerTerm = 0
+        mTimerTotal = 0
+        mTimer.base = SystemClock.elapsedRealtime()
+        mTimerTextView.base = SystemClock.elapsedRealtime()
+        mTimerRunning = false
+
+
     }
 }
