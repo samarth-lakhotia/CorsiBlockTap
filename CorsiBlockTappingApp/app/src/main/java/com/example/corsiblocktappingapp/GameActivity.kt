@@ -30,7 +30,7 @@ class GameActivity : Activity() {
     private var drawnPattern = HashSet<Int>()
     private lateinit var iter: Iterator<Int>
     private val NUMBER_OF_BLOCKS = 20
-    private val NUMBER_TO_REMEMBER = 5
+    private val NUMBER_TO_REMEMBER = 3
     private var currentNumberToRemember = NUMBER_TO_REMEMBER
     private val COLS_IN_GRID = 5
     private lateinit var nextButton: Button
@@ -65,25 +65,6 @@ class GameActivity : Activity() {
             resetAllBocks()
             startRound(generateRandom())
         }
-        builder = AlertDialog.Builder(this)
-        builder.setTitle("Do you want to play again?")
-        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
-            when (which) {
-                DialogInterface.BUTTON_POSITIVE -> {
-                    startRound(generateRandom())
-                }
-                DialogInterface.BUTTON_NEGATIVE -> Toast.makeText(
-                    this,
-                    "Negative/No button clicked.",
-                    Toast.LENGTH_LONG
-                ).show()
-                DialogInterface.BUTTON_NEUTRAL -> Toast.makeText(
-                    this,
-                    "Neutral/Cancel button clicked.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
 
         //Timer Set Up
         mTimerTextView = findViewById(R.id.total_time)
@@ -94,18 +75,9 @@ class GameActivity : Activity() {
         mTimer.base = SystemClock.elapsedRealtime()
 
 
-        rounds = ArrayList()
-        // Set the alert dialog positive/yes button
-        builder.setPositiveButton("YES", dialogClickListener)
+        rounds = ArrayList() // This list will keep track of the rounds in the game
 
-        // Set the alert dialog negative/no button
-        builder.setNegativeButton("NO", dialogClickListener)
-
-        // Set the alert dialog neutral/cancel button
-        builder.setNeutralButton("CANCEL", dialogClickListener)
-
-        // Initialize the AlertDialog using builder object
-        alertDialog = builder.create()
+        // Setting up the recycler view to populate the grid with the given number of columns
 
         recyclerView = findViewById<RecyclerView>(R.id.corsi_grid)
         viewManager = GridLayoutManager(this, COLS_IN_GRID)
@@ -121,36 +93,55 @@ class GameActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+
+        // This observer listener ensures that the pattern starts to record only after all the blocks
+        // are loaded in the foreground.
         recyclerView.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
             @SuppressLint("NewApi")
             override fun onGlobalLayout() {
                 startRound(generateRandom())
+                // Removing this listener such that it does not get stuck in an infinite loop
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this) //To change body of created functions use File | Settings | File Templates.
             }
         })
     }
 
     private fun startRound(patternToMatch: HashSet<Int>, restart: Boolean = false) {
-
+        // Disable the start and reset button while the computer is tapping the blocks
         nextButton.isEnabled = false
         resetButton.isEnabled = false
+
         setPatternSetterListener() // Listener to turn red upon clicking
+
+        // Lock all the blocks so that the user does not click while the computer is
         unlockAllBlocks(false)
 
+        // Iterator for the current pattern
         iter = patternToMatch.iterator()
+
+        // If this method has been called as a restart of the current round, this means that the user
+        // has entered the wrong pattern for the current round and can try again
         if (!restart) {
             var currRound = TappingRound(numRounds++, NUMBER_OF_BLOCKS, patternToMatch)
             rounds.add(currRound)
         }
+
+        // Update the number of tries left for the current round
         rounds.last().useTry()
+
+        // Update the text view with the new value
         setNumberOfTries(rounds.last().numTriesLeft)
+
+        // Call this method that taps the blocks mentioned in the pattern
         tapBlocks(patternToMatch)
     }
 
     private fun tapBlocks(patternToMatch: HashSet<Int>) {
         var handle = Handler()
         var i = patternToMatch.iterator()
+
+        // runnable object that taps the blocks every 1 second
         val runnable = object : Runnable {
             override fun run() {
                 if (i.hasNext()) {
@@ -158,7 +149,7 @@ class GameActivity : Activity() {
                     block.performClick()
                     handle.postDelayed(this, 1000)
                 } else {
-                    Log.i("PATTERN UPDATE", "PATTERN DRAWN. RECORDING PATTERN NOW...")
+                    // If all the blocks have been tapped, then it is turn of the user to enter in theirs
                     recordUserInput()
                     handle.removeCallbacks(this)
                 }
@@ -168,40 +159,62 @@ class GameActivity : Activity() {
     }
 
     fun recordUserInput() {
+        // User's turn to enter their pattern.
+        // We provide the user to restart the game at this point. Can be commented out if not needed
         resetButton.isEnabled=true
+
+        // Unlock all the blocks for the user to tap blocks
         unlockAllBlocks(true)
+
         resetAllBocks() // Reset All Blocks to default background for user to enter their pattern
+
+        // Set the listener for blocks to turn to the color for recording user pattern
         setRecordPatternListener()
+
+        // Start the timer for the current round as well the continuation of the timer for the whole
+        // game
         startTimer()
     }
 
 
     fun doneRecording() {
+        // Once user has entered their pattern, this method is called to wind up the round and proceed
+//        next round or restart the game
+
+        // Go back to the default listener
         setPatternSetterListener()
         resetAllBocks()
+
+        // Lock all the blocks so that user does not play around while the game is not in any round
         unlockAllBlocks(false)
+
+        // If the user has correctly entered, then allow them to go the next round by enabling the
+        // next button and increasing the number of blocks to remember in the next round by 1
         if (rounds.last().correctlyEntered) {
             nextButton.isEnabled = true
             currentNumberToRemember++
         } else {
+//            If the user has inputted the wrong pattern, check if they have any more tries left
+//            If they do not have any tries left, then the game is over and disable the next button
             if (rounds.last().numTriesLeft <= 0) {
                 resetButton.isEnabled = true
                 nextButton.isEnabled = false
             } else {
+//                else the start the same round again
                 startRound(rounds.last().getPatternToRemember(), true)
             }
 
         }
-
+//Stop timer for the last round and update the time for the current round
         stopTimer(rounds.last().correctlyEntered)
         rounds.last().endRound(mTimerTerm)
-        Log.i("TIME", mTimerTerm.toString())
+
     }
 
     fun resetGame() {
+//        Reset to the default values
         currentNumberToRemember = NUMBER_TO_REMEMBER
         rounds.clear()
-
         //Timer Clean
         timerClean()
     }
@@ -221,6 +234,7 @@ class GameActivity : Activity() {
         }
     }
 
+//    Record a single user tap. Method associated the tap with information about the tap
     fun recordTap(set: HashSet<Int>, position: Int): Boolean {
         if (!iter.hasNext()) {
             Toast.makeText(this, "Incorrect Sequence - Exceeded", Toast.LENGTH_LONG)
@@ -237,7 +251,7 @@ class GameActivity : Activity() {
             return true
         }
     }
-
+//Generate a random sequence with the current number to remember
     fun generateRandom(): HashSet<Int> {
         val k = currentNumberToRemember
         var retSet = HashSet<Int>()
@@ -247,6 +261,7 @@ class GameActivity : Activity() {
         return retSet
     }
 
+    /*Listeners for the blocks*/
     @SuppressLint("NewApi")
     fun setRecordPatternListener() {
         for (i in 0 until viewAdapter.itemCount) {
@@ -288,10 +303,6 @@ class GameActivity : Activity() {
                 it.isClickable = !it.isClickable
             }
         }
-    }
-
-    fun getStoredBackground(view: Button): ColorStateList? {
-        return (recyclerView.findContainingViewHolder(view) as GameAdapter.GameViewHolder).bg
     }
 
     //Timer Functions
