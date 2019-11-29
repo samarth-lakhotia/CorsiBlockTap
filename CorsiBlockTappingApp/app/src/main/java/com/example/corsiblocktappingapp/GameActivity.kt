@@ -18,7 +18,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.game_page.*
 import kotlin.collections.HashSet
 import kotlin.random.Random
 
@@ -32,19 +31,19 @@ class GameActivity : Activity() {
     private val NUMBER_TO_REMEMBER = 5
     private var currentNumberToRemember = NUMBER_TO_REMEMBER
     private val COLS_IN_GRID = 5
-    private lateinit var nextButton:Button
+    private lateinit var nextButton: Button
     private lateinit var resetButton: Button
-    private lateinit var builder:AlertDialog.Builder
-    private lateinit var alertDialog:AlertDialog
-    private var numRounds=0
-    private lateinit var rounds:ArrayList<TappingRound>
+    private lateinit var builder: AlertDialog.Builder
+    private lateinit var alertDialog: AlertDialog
+    private var numRounds = 0
+    private lateinit var rounds: ArrayList<TappingRound>
 
     //Var for Timer
     private lateinit var mTimerTextView: Chronometer
     private lateinit var mTimer: Chronometer
-    private var mTimerRunning:Boolean = false
-    private var mTimerTerm:Long = 0
-    private var mTimerTotal:Long = 0
+    private var mTimerRunning: Boolean = false
+    private var mTimerTerm: Long = 0
+    private var mTimerTotal: Long = 0
 
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -63,11 +62,21 @@ class GameActivity : Activity() {
         }
         builder = AlertDialog.Builder(this)
         builder.setTitle("Do you want to play again?")
-        val dialogClickListener = DialogInterface.OnClickListener{ _, which ->
-            when(which){
-                DialogInterface.BUTTON_POSITIVE -> {startRound(generateRandom())}
-                DialogInterface.BUTTON_NEGATIVE -> Toast.makeText(this,"Negative/No button clicked.",Toast.LENGTH_LONG).show()
-                DialogInterface.BUTTON_NEUTRAL -> Toast.makeText(this,"Neutral/Cancel button clicked.",Toast.LENGTH_LONG).show()
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> {
+                    startRound(generateRandom())
+                }
+                DialogInterface.BUTTON_NEGATIVE -> Toast.makeText(
+                    this,
+                    "Negative/No button clicked.",
+                    Toast.LENGTH_LONG
+                ).show()
+                DialogInterface.BUTTON_NEUTRAL -> Toast.makeText(
+                    this,
+                    "Neutral/Cancel button clicked.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -80,15 +89,15 @@ class GameActivity : Activity() {
         mTimer.base = SystemClock.elapsedRealtime()
 
 
-        rounds=ArrayList()
+        rounds = ArrayList()
         // Set the alert dialog positive/yes button
-        builder.setPositiveButton("YES",dialogClickListener)
+        builder.setPositiveButton("YES", dialogClickListener)
 
         // Set the alert dialog negative/no button
-        builder.setNegativeButton("NO",dialogClickListener)
+        builder.setNegativeButton("NO", dialogClickListener)
 
         // Set the alert dialog neutral/cancel button
-        builder.setNeutralButton("CANCEL",dialogClickListener)
+        builder.setNeutralButton("CANCEL", dialogClickListener)
 
         // Initialize the AlertDialog using builder object
         alertDialog = builder.create()
@@ -120,13 +129,13 @@ class GameActivity : Activity() {
     private fun startRound(patternToMatch: HashSet<Int>) {
         val handle = Handler()
 
-        nextButton.isEnabled=false
-        resetButton.isEnabled=false
+        nextButton.isEnabled = false
+        resetButton.isEnabled = false
         setPatternSetterListener() // Listener to turn red upon clicking
         unlockAllBlocks(false)
 
         iter = patternToMatch.iterator()
-        var currRound = TappingRound(numRounds++,NUMBER_OF_BLOCKS, patternToMatch)
+        var currRound = TappingRound(numRounds++, NUMBER_OF_BLOCKS, patternToMatch)
 
         rounds.add(currRound)
         var i = patternToMatch.iterator()
@@ -137,7 +146,7 @@ class GameActivity : Activity() {
                     block.performClick()
                     handle.postDelayed(this, 1000)
                 } else {
-                    Log.i("PATTERN UPDATE","PATTERN DRAWN. RECORDING PATTERN NOW..." )
+                    Log.i("PATTERN UPDATE", "PATTERN DRAWN. RECORDING PATTERN NOW...")
                     recordUserInput()
                     handle.removeCallbacks(this)
                 }
@@ -165,27 +174,31 @@ class GameActivity : Activity() {
 //        recordButton.visibility = View.VISIBLE
         setPatternSetterListener()
         resetAllBocks()
+        unlockAllBlocks(false)
         Log.i("Drawn Pattern", rounds.last().getTimestamps().toString())
+
 //        alertDialog.show()
-        if(rounds.last().correctlyEntered){
+        if (rounds.last().correctlyEntered) {
             nextButton.isEnabled = true
             currentNumberToRemember++
-        }
-        else{
-            resetButton.isEnabled=true
-            nextButton.isEnabled=false
+        } else {
+            resetButton.isEnabled = true
+            nextButton.isEnabled = false
         }
 
         stopTimer(rounds.last().correctlyEntered)
+        rounds.last().endRound(mTimerTerm)
+        Log.i("TIME", mTimerTerm.toString())
     }
 
-    fun resetGame(){
-        currentNumberToRemember=NUMBER_TO_REMEMBER
+    fun resetGame() {
+        currentNumberToRemember = NUMBER_TO_REMEMBER
         rounds.clear()
 
         //Timer Clean
         timerClean()
     }
+
     fun unlockAllBlocks(bool: Boolean = false) {
         for (i in 0 until viewAdapter.itemCount) {
             recyclerView[i].isEnabled = bool
@@ -287,10 +300,10 @@ class GameActivity : Activity() {
     }
 
     //Timer Functions
-    fun stopTimer(correct:Boolean):Long {
+    fun stopTimer(correct: Boolean): Long {
         if (mTimerRunning) {
             mTimer.stop()
-            when(correct) {
+            when (correct) {
                 true -> mTimerTerm = SystemClock.elapsedRealtime() - mTimer.base
                 false -> mTimerTerm = 0
             }
@@ -317,7 +330,6 @@ class GameActivity : Activity() {
         mTimer.base = SystemClock.elapsedRealtime()
         mTimerTextView.base = SystemClock.elapsedRealtime()
         mTimerRunning = false
-
 
     }
 }

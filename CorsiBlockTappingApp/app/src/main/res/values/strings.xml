@@ -8,4 +8,6 @@
     <string name="done">Done</string>
     <string name="restart">Restart</string>
     <string name="next">Next</string>
+    <string name="default_time">Total Time: 00:00</string>
+    <string name="default_game_time">00:00</string>
 </resources>
