@@ -8,9 +8,10 @@ class TappingRound(roundNumber: Int, blocksToRemember: Int, patternToRemember: H
     private var patternToRemember = patternToRemember
     private var iterator = patternToRemember.iterator()
     private var timestamps: ArrayList<LocalDateTime> = ArrayList()
-    private var numTries =1
+    var numTriesLeft =2
     private var totalTimeTaken: Long =0
     var correctlyEntered = false
+
     fun stampIt() {
         timestamps.add(LocalDateTime.now())
     }
@@ -21,6 +22,18 @@ class TappingRound(roundNumber: Int, blocksToRemember: Int, patternToRemember: H
 
     fun endRound(mTimerTotal: Long) {
         totalTimeTaken=mTimerTotal
+    }
+
+    fun useTry():Boolean{
+        if(numTriesLeft==0){
+            return false
+        }
+        numTriesLeft--
+        return true
+    }
+
+    fun getPatternToRemember(): HashSet<Int> {
+        return patternToRemember
     }
 
 }

@@ -13,11 +13,13 @@ import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.Chronometer
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.w3c.dom.Text
 import kotlin.collections.HashSet
 import kotlin.random.Random
 
@@ -33,6 +35,7 @@ class GameActivity : Activity() {
     private val COLS_IN_GRID = 5
     private lateinit var nextButton: Button
     private lateinit var resetButton: Button
+    private lateinit var numTriesTextView: TextView
     private lateinit var builder: AlertDialog.Builder
     private lateinit var alertDialog: AlertDialog
     private var numRounds = 0
@@ -53,6 +56,8 @@ class GameActivity : Activity() {
 
         nextButton = findViewById(R.id.next_button)
         nextButton.setOnClickListener { startRound(generateRandom()) }
+
+        numTriesTextView=findViewById(R.id.num_tries_view)
 
         resetButton = findViewById(R.id.restart_button)
         resetButton.setOnClickListener {
@@ -126,8 +131,7 @@ class GameActivity : Activity() {
         })
     }
 
-    private fun startRound(patternToMatch: HashSet<Int>) {
-        val handle = Handler()
+    private fun startRound(patternToMatch: HashSet<Int>, restart: Boolean = false) {
 
         nextButton.isEnabled = false
         resetButton.isEnabled = false
@@ -135,9 +139,17 @@ class GameActivity : Activity() {
         unlockAllBlocks(false)
 
         iter = patternToMatch.iterator()
-        var currRound = TappingRound(numRounds++, NUMBER_OF_BLOCKS, patternToMatch)
+        if (!restart) {
+            var currRound = TappingRound(numRounds++, NUMBER_OF_BLOCKS, patternToMatch)
+            rounds.add(currRound)
+        }
+        rounds.last().useTry()
+        setNumberOfTries(rounds.last().numTriesLeft)
+        tapBlocks(patternToMatch)
+    }
 
-        rounds.add(currRound)
+    private fun tapBlocks(patternToMatch: HashSet<Int>) {
+        var handle = Handler()
         var i = patternToMatch.iterator()
         val runnable = object : Runnable {
             override fun run() {
@@ -156,11 +168,7 @@ class GameActivity : Activity() {
     }
 
     fun recordUserInput() {
-//        startButton.visibility = View.GONE
-//        recordButton.visibility = View.GONE
-//        recordButton.isEnabled = false
-//        doneButton.visibility = View.VISIBLE
-
+        resetButton.isEnabled=true
         unlockAllBlocks(true)
         resetAllBocks() // Reset All Blocks to default background for user to enter their pattern
         setRecordPatternListener()
@@ -169,21 +177,20 @@ class GameActivity : Activity() {
 
 
     fun doneRecording() {
-//        doneButton.visibility = View.GONE
-//        startButton.visibility = View.VISIBLE
-//        recordButton.visibility = View.VISIBLE
         setPatternSetterListener()
         resetAllBocks()
         unlockAllBlocks(false)
-        Log.i("Drawn Pattern", rounds.last().getTimestamps().toString())
-
-//        alertDialog.show()
         if (rounds.last().correctlyEntered) {
             nextButton.isEnabled = true
             currentNumberToRemember++
         } else {
-            resetButton.isEnabled = true
-            nextButton.isEnabled = false
+            if (rounds.last().numTriesLeft <= 0) {
+                resetButton.isEnabled = true
+                nextButton.isEnabled = false
+            } else {
+                startRound(rounds.last().getPatternToRemember(), true)
+            }
+
         }
 
         stopTimer(rounds.last().correctlyEntered)
@@ -216,13 +223,13 @@ class GameActivity : Activity() {
 
     fun recordTap(set: HashSet<Int>, position: Int): Boolean {
         if (!iter.hasNext()) {
-            Toast.makeText(this, "Incorrect Sequence - Exceeded. Going Back", Toast.LENGTH_LONG)
+            Toast.makeText(this, "Incorrect Sequence - Exceeded", Toast.LENGTH_LONG)
                 .show()
             return false
         } else {
             rounds.last().stampIt()
             if (iter.next() != position) {
-                Toast.makeText(this, "Incorrect Sequence. Going Back..", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Incorrect Sequence", Toast.LENGTH_LONG).show()
                 return false
             }
 
@@ -252,10 +259,8 @@ class GameActivity : Activity() {
                         doneRecording()
                     } else {
                         if (!iter.hasNext()) {
-                            Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show()
                             rounds.last().correctlyEntered = true
                             doneRecording()
-
                         }
                         it.isClickable = !it.isClickable
                     }
@@ -331,5 +336,9 @@ class GameActivity : Activity() {
         mTimerTextView.base = SystemClock.elapsedRealtime()
         mTimerRunning = false
 
+    }
+
+    fun setNumberOfTries(triesLeft:Int){
+        numTriesTextView.text="${resources.getString(R.string.tries_left)} ${triesLeft}"
     }
 }
