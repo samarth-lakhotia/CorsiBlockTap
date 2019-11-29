@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
@@ -199,6 +200,9 @@ class GameActivity : Activity() {
             if (rounds.last().numTriesLeft <= 0) {
                 resetButton.isEnabled = true
                 nextButton.isEnabled = false
+                var complete = Intent(this, FinishActivity::class.java)
+                complete.putExtra("rounds", numRounds)
+                startActivity(complete)
             } else {
 //                else the start the same round again
                 startRound(rounds.last().getPatternToRemember(), true)
