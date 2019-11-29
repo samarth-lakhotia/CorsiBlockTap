@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.res.ColorStateList
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -17,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.game_page.*
 import kotlin.collections.HashSet
 import kotlin.random.Random
 
@@ -24,32 +24,44 @@ class GameActivity : Activity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-    //    private lateinit var startButton: Button
-//    private lateinit var recordButton: Button
-//    private lateinit var doneButton: Button
-    private lateinit var mBg: Drawable
     private var drawnPattern = HashSet<Int>()
     private lateinit var iter: Iterator<Int>
     private val NUMBER_OF_BLOCKS = 20
-    private var NUMBER_TO_REMEMBER = 5
+    private val NUMBER_TO_REMEMBER = 5
+    private var currentNumberToRemember = NUMBER_TO_REMEMBER
     private val COLS_IN_GRID = 5
+    private lateinit var nextButton:Button
+    private lateinit var resetButton: Button
     private lateinit var builder:AlertDialog.Builder
     private lateinit var alertDialog:AlertDialog
+    private var numRounds=0
+    private lateinit var rounds:ArrayList<TappingRound>
+
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_page)
+
+        nextButton = findViewById(R.id.next_button)
+        nextButton.setOnClickListener { startRound(generateRandom()) }
+
+        resetButton = findViewById(R.id.restart_button)
+        resetButton.setOnClickListener {
+            resetGame()
+            resetAllBocks()
+            startRound(generateRandom())
+        }
         builder = AlertDialog.Builder(this)
         builder.setTitle("Do you want to play again?")
         val dialogClickListener = DialogInterface.OnClickListener{ _, which ->
             when(which){
-                DialogInterface.BUTTON_POSITIVE -> {NUMBER_TO_REMEMBER++;drawGeneratedPattern(generateRandom())}
+                DialogInterface.BUTTON_POSITIVE -> {startRound(generateRandom())}
                 DialogInterface.BUTTON_NEGATIVE -> Toast.makeText(this,"Negative/No button clicked.",Toast.LENGTH_LONG).show()
                 DialogInterface.BUTTON_NEUTRAL -> Toast.makeText(this,"Neutral/Cancel button clicked.",Toast.LENGTH_LONG).show()
             }
         }
-
-
+        rounds=ArrayList()
         // Set the alert dialog positive/yes button
         builder.setPositiveButton("YES",dialogClickListener)
 
@@ -59,22 +71,8 @@ class GameActivity : Activity() {
         // Set the alert dialog neutral/cancel button
         builder.setNeutralButton("CANCEL",dialogClickListener)
 
-
         // Initialize the AlertDialog using builder object
         alertDialog = builder.create()
-
-//        startButton = findViewById(R.id.start_button)
-//        recordButton = findViewById(R.id.record_button)
-//        doneButton = findViewById(R.id.done_button)
-//        startButton.setOnClickListener {
-//            drawGeneratedPattern(generateRandom())
-//        }
-//        recordButton.setOnClickListener {
-//            recordUserPattern()
-//        }
-//        doneButton.setOnClickListener {
-//            doneRecording()
-//        }
 
         recyclerView = findViewById<RecyclerView>(R.id.corsi_grid)
         viewManager = GridLayoutManager(this, COLS_IN_GRID)
@@ -94,18 +92,24 @@ class GameActivity : Activity() {
             ViewTreeObserver.OnGlobalLayoutListener {
             @SuppressLint("NewApi")
             override fun onGlobalLayout() {
-                drawGeneratedPattern(generateRandom())
+                startRound(generateRandom())
                 recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this) //To change body of created functions use File | Settings | File Templates.
             }
         })
-
     }
 
-    private fun drawGeneratedPattern(patternToMatch: HashSet<Int>) {
+    private fun startRound(patternToMatch: HashSet<Int>) {
         val handle = Handler()
-        setDefaultListeners()
+
+        nextButton.isEnabled=false
+        resetButton.isEnabled=false
+        setPatternSetterListener() // Listener to turn red upon clicking
         unlockAllBlocks(false)
+
         iter = patternToMatch.iterator()
+        var currRound = TappingRound(numRounds++,NUMBER_OF_BLOCKS, patternToMatch)
+
+        rounds.add(currRound)
         var i = patternToMatch.iterator()
         val runnable = object : Runnable {
             override fun run() {
@@ -114,9 +118,8 @@ class GameActivity : Activity() {
                     block.performClick()
                     handle.postDelayed(this, 1000)
                 } else {
-//                    recordButton.isEnabled = true
-                    Log.i("PATTERN ENDED", "PATTERN ENDED")
-                    recordUserPattern()
+                    Log.i("PATTERN UPDATE","PATTERN DRAWN. RECORDING PATTERN NOW..." )
+                    recordUserInput()
                     handle.removeCallbacks(this)
                 }
             }
@@ -124,17 +127,15 @@ class GameActivity : Activity() {
         handle.post(runnable)
     }
 
-    @SuppressLint("NewApi")
-    fun recordUserPattern() {
+    fun recordUserInput() {
 //        startButton.visibility = View.GONE
 //        recordButton.visibility = View.GONE
 //        recordButton.isEnabled = false
 //        doneButton.visibility = View.VISIBLE
 
         unlockAllBlocks(true)
-        resetAllBocks()
-        setRecordListener()
-
+        resetAllBocks() // Reset All Blocks to default background for user to enter their pattern
+        setRecordPatternListener()
     }
 
 
@@ -142,12 +143,24 @@ class GameActivity : Activity() {
 //        doneButton.visibility = View.GONE
 //        startButton.visibility = View.VISIBLE
 //        recordButton.visibility = View.VISIBLE
-        setDefaultListeners()
+        setPatternSetterListener()
         resetAllBocks()
-        Log.i("Drawn Pattern", drawnPattern.toString())
-        alertDialog.show()
+        Log.i("Drawn Pattern", rounds.last().getTimestamps().toString())
+//        alertDialog.show()
+        if(rounds.last().correctlyEntered){
+            nextButton.isEnabled = true
+            currentNumberToRemember++
+        }
+        else{
+            resetButton.isEnabled=true
+            nextButton.isEnabled=false
+        }
     }
 
+    fun resetGame(){
+        currentNumberToRemember=NUMBER_TO_REMEMBER
+        rounds.clear()
+    }
     fun unlockAllBlocks(bool: Boolean = false) {
         for (i in 0 until viewAdapter.itemCount) {
             recyclerView[i].isEnabled = bool
@@ -169,6 +182,7 @@ class GameActivity : Activity() {
                 .show()
             return false
         } else {
+            rounds.last().stampIt()
             if (iter.next() != position) {
                 Toast.makeText(this, "Incorrect Sequence. Going Back..", Toast.LENGTH_LONG).show()
                 return false
@@ -180,7 +194,7 @@ class GameActivity : Activity() {
     }
 
     fun generateRandom(): HashSet<Int> {
-        val k = NUMBER_TO_REMEMBER
+        val k = currentNumberToRemember
         var retSet = HashSet<Int>()
         while (retSet.size != k) {
             retSet.add(Random.nextInt(NUMBER_OF_BLOCKS))
@@ -189,19 +203,21 @@ class GameActivity : Activity() {
     }
 
     @SuppressLint("NewApi")
-    fun setRecordListener() {
+    fun setRecordPatternListener() {
         for (i in 0 until viewAdapter.itemCount) {
             recyclerView[i].setOnClickListener(null)
             recyclerView[i].setOnClickListener {
 
                 if (it.isClickable) {
-                    it.backgroundTintList = getColorStateList(R.color.block_color_green)
+                    it.backgroundTintList = getColorStateList(R.color.block_color_recording_pattern)
                     if (!recordTap(drawnPattern, i)) {
                         doneRecording()
                     } else {
                         if (!iter.hasNext()) {
                             Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show()
+                            rounds.last().correctlyEntered = true
                             doneRecording()
+
                         }
                         it.isClickable = !it.isClickable
                     }
@@ -216,13 +232,13 @@ class GameActivity : Activity() {
     }
 
     @SuppressLint("NewApi")
-    fun setDefaultListeners() {
+    fun setPatternSetterListener() {
         for (i in 0 until viewAdapter.itemCount) {
             recyclerView[i].setOnClickListener(null)
             recyclerView[i].setOnClickListener {
                 if (it.isClickable) {
 //                    it.setBackgroundColor(Color.RED)
-                    it.backgroundTintList = getColorStateList(R.color.block_color_state)
+                    it.backgroundTintList = getColorStateList(R.color.block_color_setting_pattern)
                 } else {
                     it.backgroundTintList = getColorStateList(R.color.block_color_default)
                 }
