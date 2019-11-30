@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         settingsButton = findViewById(R.id.settings_button)
 
         prefs =getSharedPreferences("configuration", Context.MODE_PRIVATE)
-        prefs.edit().clear().apply()
+//        prefs.edit().clear().apply()
 
         playButton.setOnClickListener {
             if(prefs.getInt("difficulty",-1) != -1)
