@@ -10,12 +10,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_finish.*
 
 import kotlinx.android.synthetic.main.activity_main.*
 
 class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button
     private lateinit var finishText: TextView
+    private lateinit var csvButton: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +25,11 @@ class FinishActivity : AppCompatActivity() {
 
         finishText = findViewById(R.id.finish_text)
         playButton = findViewById(R.id.play_button)
+        csvButton = findViewById(R.id.csv_button)
         finishText.gravity = Gravity.CENTER
         finishText.text = "You reached Round: " + intent.getIntExtra("rounds", 0).toString()
         playButton.text = "Try Again"
+        csvButton.text = "Export to csv"
         playButton.setOnClickListener {
             startActivity(Intent(this, GameActivity::class.java))
         }

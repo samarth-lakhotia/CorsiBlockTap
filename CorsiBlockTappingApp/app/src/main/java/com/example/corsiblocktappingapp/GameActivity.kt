@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
+import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.Chronometer
@@ -19,8 +20,16 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 import kotlin.collections.HashSet
 import kotlin.random.Random
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class GameActivity : Activity() {
     private lateinit var recyclerView: RecyclerView
@@ -48,6 +57,8 @@ class GameActivity : Activity() {
     private var NUMBER_TO_REMEMBER = -1
     private var currentNumberToRemember = NUMBER_TO_REMEMBER
     private val COLS_IN_GRID = 5
+
+    val roundData = arrayListOf<RoundData>()
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -261,20 +272,42 @@ class GameActivity : Activity() {
 
 //    Record a single user tap. Method associated the tap with information about the tap
     fun recordTap(set: HashSet<Int>, position: Int): Boolean {
+        val milliRoundTime = TimeUnit.MILLISECONDS.toSeconds(SystemClock.elapsedRealtime() - mTimer.base).toString()
+        val dateFormatter = SimpleDateFormat("MM/dd/yyyy hh:mm:ss")
+        dateFormatter.setLenient(false)
+        val s = dateFormatter.format(Date())
+
         if (!iter.hasNext()) {
             Toast.makeText(this, "Incorrect Sequence - Exceeded", Toast.LENGTH_LONG)
                 .show()
+            //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- INCORRECT")
+            roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, false)))
+            for (data in roundData)
+                Log.i("ASDF", data.toString())
+            Log.i("ASDF", "\\n")
             return false
         } else {
             rounds.last().stampIt()
             if (iter.next() != position) {
                 Toast.makeText(this, "Incorrect Sequence", Toast.LENGTH_LONG).show()
+                //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- INCORRECT")
+                roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, false)))
+                for (data in roundData)
+                    Log.i("ASDF", data.toString())
+                Log.i("ASDF", "\\n")
                 return false
             }
 
+            //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- CORRECT")
+            roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, true)))
+
+            for (data in roundData)
+                Log.i("ASDF", data.toString())
+            Log.i("ASDF", "\\n")
             set.add(position)
             return true
         }
+
     }
 //Generate a random sequence with the current number to remember
     fun generateRandom(): HashSet<Int> {
