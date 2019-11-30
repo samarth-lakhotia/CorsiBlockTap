@@ -1,6 +1,8 @@
 package com.example.corsiblocktappingapp
 
-class RoundData {
+import java.io.Serializable
+
+class RoundData : Serializable {
     var datetime: String? = null
     var tapPosition: Int? = null
     var elapsedRoundTimeInSec: String? = null

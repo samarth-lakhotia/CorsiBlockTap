@@ -58,7 +58,7 @@ class GameActivity : Activity() {
     private var currentNumberToRemember = NUMBER_TO_REMEMBER
     private val COLS_IN_GRID = 5
 
-    val roundData = arrayListOf<RoundData>()
+    val roundData = ArrayList<RoundData>()
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -234,6 +234,7 @@ class GameActivity : Activity() {
                 nextButton.isEnabled = false
                 var complete = Intent(this, FinishActivity::class.java)
                 complete.putExtra("rounds", numRounds)
+                complete.putExtra("roundData", roundData)
                 startActivity(complete)
             } else {
 //                else the start the same round again
@@ -276,34 +277,23 @@ class GameActivity : Activity() {
         val dateFormatter = SimpleDateFormat("MM/dd/yyyy hh:mm:ss")
         dateFormatter.setLenient(false)
         val s = dateFormatter.format(Date())
+        //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- INCORRECT")
 
-        if (!iter.hasNext()) {
+
+    if (!iter.hasNext()) {
             Toast.makeText(this, "Incorrect Sequence - Exceeded", Toast.LENGTH_LONG)
                 .show()
-            //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- INCORRECT")
             roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, false)))
-            for (data in roundData)
-                Log.i("ASDF", data.toString())
-            Log.i("ASDF", "\\n")
             return false
         } else {
             rounds.last().stampIt()
             if (iter.next() != position) {
                 Toast.makeText(this, "Incorrect Sequence", Toast.LENGTH_LONG).show()
-                //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- INCORRECT")
                 roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, false)))
-                for (data in roundData)
-                    Log.i("ASDF", data.toString())
-                Log.i("ASDF", "\\n")
                 return false
             }
 
-            //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- CORRECT")
             roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, true)))
-
-            for (data in roundData)
-                Log.i("ASDF", data.toString())
-            Log.i("ASDF", "\\n")
             set.add(position)
             return true
         }

@@ -2,6 +2,7 @@ package com.example.corsiblocktappingapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.Gravity
 import com.google.android.material.snackbar.Snackbar
@@ -13,15 +14,24 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_finish.*
 
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.FileWriter
+import java.io.IOException
+import java.io.Serializable
 
 class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button
     private lateinit var finishText: TextView
     private lateinit var csvButton: TextView
+    private val csvHeader = "Datetime,TapPosition,ElapsedRoundTime(s),BlocksToRmr,Correct"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finish)
+
+        val roundData = intent.getSerializableExtra("roundData") as ArrayList<RoundData>
+        // writes to /storage/emulated/0/Android/data/com.example.corsiblocktappingapp/files/MyFileStorage because
+        // getExternalStorageDirectory is now deprevated. This folder can be accessed via ES FileExplorer.
+        val fileWriter = FileWriter(getExternalFilesDir("MyFileStorage").toString() + "/DataFromSession.csv")
 
         finishText = findViewById(R.id.finish_text)
         playButton = findViewById(R.id.play_button)
@@ -30,8 +40,43 @@ class FinishActivity : AppCompatActivity() {
         finishText.text = "You reached Round: " + intent.getIntExtra("rounds", 0).toString()
         playButton.text = "Try Again"
         csvButton.text = "Export to csv"
+
         playButton.setOnClickListener {
             startActivity(Intent(this, GameActivity::class.java))
+        }
+
+        // writing the data from each round to a csv file
+        csvButton.setOnClickListener {
+            try {
+                fileWriter.append(csvHeader)
+                fileWriter.append('\n')
+
+                for (data in roundData) {
+                    fileWriter.append(data.datetime)
+                    fileWriter.append(',')
+                    fileWriter.append(data.tapPosition.toString())
+                    fileWriter.append(',')
+                    fileWriter.append(data.elapsedRoundTimeInSec)
+                    fileWriter.append(',')
+                    fileWriter.append(data.currentBlocksToRmr.toString())
+                    fileWriter.append(',')
+                    fileWriter.append(data.correct.toString())
+                    fileWriter.append('\n')
+                }
+
+                Log.i("ASDF", "Wrote to CSV successfully!")
+            } catch (e: Exception) {
+                Log.i("ASDF", "Did not write to CSV successfully!")
+                Log.i("ASDF", e.printStackTrace().toString())
+            } finally {
+                try {
+                    fileWriter.flush()
+                    fileWriter.close()
+                } catch (e: IOException) {
+                    Log.i("ASDF", "flushing/closing Error!")
+                    Log.i("ASDF", e.printStackTrace().toString())
+                }
+            }
         }
     }
 

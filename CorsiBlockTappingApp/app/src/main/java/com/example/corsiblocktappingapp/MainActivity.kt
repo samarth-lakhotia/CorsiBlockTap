@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefs:SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
         playButton = findViewById(R.id.play_button)
         settingsButton = findViewById(R.id.settings_button)
