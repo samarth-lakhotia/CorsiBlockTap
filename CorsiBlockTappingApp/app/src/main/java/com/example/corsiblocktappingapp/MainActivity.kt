@@ -1,7 +1,10 @@
 package com.example.corsiblocktappingapp
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
@@ -12,13 +15,29 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var playButton: Button
+    private lateinit var settingsButton:Button
+    private lateinit var prefs:SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         playButton = findViewById(R.id.play_button)
+        settingsButton = findViewById(R.id.settings_button)
+
+        prefs =getSharedPreferences("configuration", Context.MODE_PRIVATE)
+        prefs.edit().clear().apply()
+
         playButton.setOnClickListener {
-            startActivity(Intent(this, GameActivity::class.java))
+            if(prefs.getInt("difficulty",-1) != -1)
+                startActivity(Intent(this, GameActivity::class.java))
+            else{
+                val intent = Intent()
+                intent.putExtra("START_GAME",true)
+                intent.setClass(this, SettingsActivity::class.java)
+                startActivity(intent)
+            }
         }
+
+        settingsButton.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java))  }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

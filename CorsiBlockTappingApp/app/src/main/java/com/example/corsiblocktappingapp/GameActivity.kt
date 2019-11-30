@@ -3,14 +3,13 @@ package com.example.corsiblocktappingapp
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
+import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
-import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.Chronometer
@@ -20,7 +19,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.w3c.dom.Text
 import kotlin.collections.HashSet
 import kotlin.random.Random
 
@@ -30,10 +28,7 @@ class GameActivity : Activity() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private var drawnPattern = HashSet<Int>()
     private lateinit var iter: Iterator<Int>
-    private val NUMBER_OF_BLOCKS = 20
-    private val NUMBER_TO_REMEMBER = 3
-    private var currentNumberToRemember = NUMBER_TO_REMEMBER
-    private val COLS_IN_GRID = 5
+
     private lateinit var nextButton: Button
     private lateinit var resetButton: Button
     private lateinit var numTriesTextView: TextView
@@ -41,7 +36,7 @@ class GameActivity : Activity() {
     private lateinit var alertDialog: AlertDialog
     private var numRounds = 0
     private lateinit var rounds: ArrayList<TappingRound>
-
+    private lateinit var userPreferences: SharedPreferences
     //Var for Timer
     private lateinit var mTimerTextView: Chronometer
     private lateinit var mTimer: Chronometer
@@ -49,12 +44,17 @@ class GameActivity : Activity() {
     private var mTimerTerm: Long = 0
     private var mTimerTotal: Long = 0
 
+    private var NUMBER_OF_BLOCKS = -1
+    private var NUMBER_TO_REMEMBER = -1
+    private var currentNumberToRemember = NUMBER_TO_REMEMBER
+    private val COLS_IN_GRID = 5
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.game_page)
-
+        setContentView(R.layout.activity_game)
+        userPreferences=getSharedPreferences("configuration", Context.MODE_PRIVATE)
+        setDifficultyConfigurations()
         nextButton = findViewById(R.id.next_button)
         nextButton.setOnClickListener { startRound(generateRandom()) }
 
@@ -90,6 +90,27 @@ class GameActivity : Activity() {
         recyclerView.layoutManager = viewManager
 
 
+    }
+
+    private fun setDifficultyConfigurations() {
+        var difficulty = userPreferences.getInt("difficulty",-1)
+        var diff:DIFFICULTY
+        when (difficulty) {
+            DIFFICULTY.EASY_DIFFICULTY.id -> {
+                diff = DIFFICULTY.EASY_DIFFICULTY
+
+            }
+            DIFFICULTY.MEDIUM_DIFFICULTY.id -> {
+                diff= DIFFICULTY.MEDIUM_DIFFICULTY
+
+            }
+            else -> {
+                diff= DIFFICULTY.HARD_DIFFICULTY
+            }
+        }
+        NUMBER_OF_BLOCKS=diff.NUMBER_OF_BLOCKS
+        NUMBER_TO_REMEMBER=diff.INITIAL_BLOCKS_TO_REMEMBER
+        currentNumberToRemember=NUMBER_TO_REMEMBER
     }
 
     override fun onResume() {
