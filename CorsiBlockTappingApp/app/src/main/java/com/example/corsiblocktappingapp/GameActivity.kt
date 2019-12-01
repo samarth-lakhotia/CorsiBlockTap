@@ -240,7 +240,7 @@ class GameActivity : Activity() {
 
                 var completeResults = Intent(this, FinishActivity::class.java)
                 completeResults.putExtra("rounds", gameSession.getNumberOfRoundsPlayed())
-                completeResults.putExtra("roundData", blocksData)
+                completeResults.putExtra("roundData", gameSession.getTheLatestRound().getUserTaps())
                 startActivity(completeResults)
             } else {
 //                else the start the same round again

@@ -8,6 +8,7 @@ class BlockTap(position:Int, tapTime:LocalDateTime, elapsedTime:Long) : Serializ
     var tapPositionWithRespectToGrid: Int? = position
     var timeTappedSinceBeginning: Long = elapsedTime
     var wasItCorrectlyTapped: Boolean = true
+    var uuid: String = ""
 
     fun setCorrectness(value:Boolean){
         wasItCorrectlyTapped=value

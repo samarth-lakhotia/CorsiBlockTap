@@ -21,6 +21,10 @@ class Round(roundNumber: Int, blocksToRemember: Int, patternToRemember: HashSet<
         return LocalDateTime.now()
     }
 
+    fun getUserTaps() : ArrayList<BlockTap> {
+        return userTaps
+    }
+
     fun endRound(mTimerTotal: Long) {
         totalTimeTaken=mTimerTotal
     }

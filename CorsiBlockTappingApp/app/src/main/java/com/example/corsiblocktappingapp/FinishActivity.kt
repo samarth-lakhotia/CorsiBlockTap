@@ -1,5 +1,6 @@
 package com.example.corsiblocktappingapp
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,13 +17,25 @@ import models.BlockTap
 
 import java.io.FileWriter
 import java.io.IOException
+import android.net.NetworkCapabilities
+import android.net.Network
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
+import android.os.Build
+import android.content.Context.CONNECTIVITY_SERVICE
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button
     private lateinit var finishText: TextView
     private lateinit var csvButton: TextView
     private lateinit var firebaseButton: TextView
-    private val csvHeader = "TapTimestamp,TapPositionWithRespectToGrid,TimeTappedSinceBeginning(s),WasItCorrectlyTapped"
+    private val csvHeader = "TapTimestamp,TapPositionWithRespectToGrid,TimeTappedSinceBeginning(ms),WasItCorrectlyTapped"
     private lateinit var dbReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,16 +51,17 @@ class FinishActivity : AppCompatActivity() {
         playButton = findViewById(R.id.play_button)
         csvButton = findViewById(R.id.csv_button)
         firebaseButton = findViewById(R.id.firebase_button)
+
         finishText.gravity = Gravity.CENTER
-        firebaseButton.text = "Upload to Firebase"
         finishText.text = """You reached Round: ${intent.getIntExtra("rounds", 0)}"""
         playButton.text = "Try Again"
-        csvButton.text = "Export to csv"
+        firebaseButton.text = "Upload to Firebase"
 
         playButton.setOnClickListener {
             startActivity(Intent(this, GameActivity::class.java))
         }
 
+        csvButton.text = "Export to csv"
         // writing the data from each round to a csv file
         csvButton.setOnClickListener {
             try {
@@ -86,21 +100,40 @@ class FinishActivity : AppCompatActivity() {
             }
         }
 
-        dbReference = FirebaseDatabase.getInstance().getReference("user")
+        dbReference = FirebaseDatabase.getInstance().getReference("usersData")
         firebaseButton.setOnClickListener {
             Toast.makeText(this, "Uploading data to Firebase", Toast.LENGTH_LONG)
                 .show()
 
-
-            for (data in tapData) {
-                dbReference.setValue("Hello, world!")
+            tapData.forEach {
+                val key = dbReference.child("usersData").push().key
+                it.uuid = key!!
+                dbReference.child("taps").child(key).setValue(it)
             }
+        }
 
 
+        // if WiFi is enabled, then make the firebase upload button enabled
+        firebaseButton.isEnabled = (checkForNetwork(baseContext))
+        // otherwise, show a toast telling the user to connect to WiFi
+        if (!checkForNetwork(baseContext)) {
+            Toast.makeText(this, "Please connect to WiFi in order to upload data to Firebase", Toast.LENGTH_LONG)
+                .show()
         }
     }
 
-
+    private fun checkForNetwork(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        // if past API level 23, use the new method. Otherwise, use the deprecated method
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val nw = connectivityManager.activeNetwork ?: return false
+            val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
+            return actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+        } else {
+            val nwInfo = connectivityManager.activeNetworkInfo ?: return false
+            return nwInfo.isConnected
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
