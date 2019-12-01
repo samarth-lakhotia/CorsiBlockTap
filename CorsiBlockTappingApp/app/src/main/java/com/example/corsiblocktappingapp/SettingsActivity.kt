@@ -30,13 +30,12 @@ class SettingsActivity : Activity() {
                 }
             }
             editor.apply()
-            var toastText ="Preferences have been saved successfully..."
+            var toastText = "Preferences have been saved successfully..."
 
             if (intent.getBooleanExtra("START_GAME", false)) {
-                Toast.makeText(this, toastText+"Starting Game now...", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, toastText + "Starting Game now...", Toast.LENGTH_LONG).show()
                 startActivity(Intent(this, GameActivity::class.java))
-            }
-            else{
+            } else {
                 Toast.makeText(this, toastText, Toast.LENGTH_LONG).show()
             }
         }

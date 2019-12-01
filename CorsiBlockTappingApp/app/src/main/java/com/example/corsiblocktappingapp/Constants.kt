@@ -1,7 +1,5 @@
 package com.example.corsiblocktappingapp
 
-import kotlin.properties.Delegates
-
 enum class DIFFICULTY {
     EASY_DIFFICULTY {
         override var INITIAL_BLOCKS_TO_REMEMBER = 3
@@ -25,7 +23,9 @@ enum class DIFFICULTY {
 }
 
 class Constants {
-    val EASY_INITIAL_NUMBER_OF_BLOCKS_REMEMBER = 4
-    val MEDIUM_INITAL_NUMBER_OF_BLOCKS_REMEMBER = 4
-    val HARD_INITIAL_NUMBER_BLOCKS_REMEMBER = 5
+    companion object{
+        const val COLS_IN_GRID=5
+    }
+
 }
+

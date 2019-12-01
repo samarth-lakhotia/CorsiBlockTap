@@ -2,21 +2,17 @@ package com.example.corsiblocktappingapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.Gravity
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
-import kotlinx.android.synthetic.main.activity_finish.*
+import models.BlockTap
 
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.FileWriter
 import java.io.IOException
-import java.io.Serializable
 
 class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button
@@ -28,7 +24,7 @@ class FinishActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finish)
 
-        val roundData = intent.getSerializableExtra("roundData") as ArrayList<RoundData>
+        val roundData = intent.getSerializableExtra("roundData") as ArrayList<BlockTap>
         // writes to /storage/emulated/0/Android/data/com.example.corsiblocktappingapp/files/MyFileStorage because
         // getExternalStorageDirectory is now deprevated. This folder can be accessed via ES FileExplorer.
         val fileWriter = FileWriter(getExternalFilesDir("MyFileStorage").toString() + "/DataFromSession.csv")
@@ -37,7 +33,7 @@ class FinishActivity : AppCompatActivity() {
         playButton = findViewById(R.id.play_button)
         csvButton = findViewById(R.id.csv_button)
         finishText.gravity = Gravity.CENTER
-        finishText.text = "You reached Round: " + intent.getIntExtra("rounds", 0).toString()
+        finishText.text = """You reached Round: ${intent.getIntExtra("rounds", 0)}"""
         playButton.text = "Try Again"
         csvButton.text = "Export to csv"
 
@@ -52,15 +48,15 @@ class FinishActivity : AppCompatActivity() {
                 fileWriter.append('\n')
 
                 for (data in roundData) {
-                    fileWriter.append(data.datetime)
+                    fileWriter.append(data.tapTimestamp.toString())
                     fileWriter.append(',')
-                    fileWriter.append(data.tapPosition.toString())
+                    fileWriter.append(data.tapPositionWithRespectToGrid.toString())
                     fileWriter.append(',')
-                    fileWriter.append(data.elapsedRoundTimeInSec)
+                    fileWriter.append(data.timeTappedSinceBeginning.toString())
                     fileWriter.append(',')
-                    fileWriter.append(data.currentBlocksToRmr.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.correct.toString())
+//                    fileWriter.append(data.currentBlocksToRmr.toString())
+//                    fileWriter.append(',')
+                    fileWriter.append(data.wasItCorrectlyTapped.toString())
                     fileWriter.append('\n')
                 }
 

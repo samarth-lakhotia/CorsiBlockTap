@@ -2,7 +2,6 @@ package com.example.corsiblocktappingapp
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
-import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.Chronometer
@@ -20,14 +18,11 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.get
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
+import models.BlockTap
+import models.GameSession
 import kotlin.collections.HashSet
 import kotlin.random.Random
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -35,41 +30,49 @@ class GameActivity : Activity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private var drawnPattern = HashSet<Int>()
-    private lateinit var iter: Iterator<Int>
-
     private lateinit var nextButton: Button
     private lateinit var resetButton: Button
     private lateinit var numTriesTextView: TextView
-    private lateinit var builder: AlertDialog.Builder
-    private lateinit var alertDialog: AlertDialog
-    private var numRounds = 0
-    private lateinit var rounds: ArrayList<TappingRound>
-    private lateinit var userPreferences: SharedPreferences
-    //Var for Timer
     private lateinit var mTimerTextView: Chronometer
     private lateinit var mTimer: Chronometer
+
+    private lateinit var userPreferences: SharedPreferences
+
+    private lateinit var gameSession: GameSession
+    private lateinit var gameSessions:ArrayList<GameSession>
+    private lateinit var difficulty: DIFFICULTY
+    val blocksData = ArrayList<BlockTap>()
+    private lateinit var iter: Iterator<Int>
+    private var numRounds = 0
     private var mTimerRunning: Boolean = false
     private var mTimerTerm: Long = 0
     private var mTimerTotal: Long = 0
 
+    //Var for Timer
+
     private var NUMBER_OF_BLOCKS = -1
     private var NUMBER_TO_REMEMBER = -1
     private var currentNumberToRemember = NUMBER_TO_REMEMBER
-    private val COLS_IN_GRID = 5
+    private val COLS_IN_GRID = Constants.COLS_IN_GRID
 
-    val roundData = ArrayList<RoundData>()
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
-        userPreferences=getSharedPreferences("configuration", Context.MODE_PRIVATE)
-        setDifficultyConfigurations()
+
+        userPreferences = getSharedPreferences("configuration", Context.MODE_PRIVATE)
+        difficulty=setDifficultyConfigurations()
+
+
+        gameSession = GameSession(difficulty)
+        gameSessions = ArrayList()
+        gameSessions.add(gameSession)
+
         nextButton = findViewById(R.id.next_button)
         nextButton.setOnClickListener { startRound(generateRandom()) }
 
-        numTriesTextView=findViewById(R.id.num_tries_view)
+        numTriesTextView = findViewById(R.id.num_tries_view)
 
         resetButton = findViewById(R.id.restart_button)
         resetButton.setOnClickListener {
@@ -86,12 +89,9 @@ class GameActivity : Activity() {
         mTimer.format = "Time: %s"
         mTimer.base = SystemClock.elapsedRealtime()
 
-
-        rounds = ArrayList() // This list will keep track of the rounds in the game
-
         // Setting up the recycler view to populate the grid with the given number of columns
 
-        recyclerView = findViewById<RecyclerView>(R.id.corsi_grid)
+        recyclerView = findViewById(R.id.corsi_grid)
         viewManager = GridLayoutManager(this, COLS_IN_GRID)
         var arr = Array(NUMBER_OF_BLOCKS) { "" }
         viewAdapter = GameAdapter(arr)
@@ -103,25 +103,27 @@ class GameActivity : Activity() {
 
     }
 
-    private fun setDifficultyConfigurations() {
-        var difficulty = userPreferences.getInt("difficulty",-1)
-        var diff:DIFFICULTY
+    private fun setDifficultyConfigurations(): DIFFICULTY {
+        var difficulty = userPreferences.getInt("difficulty", -1)
+        var diff: DIFFICULTY
         when (difficulty) {
             DIFFICULTY.EASY_DIFFICULTY.id -> {
                 diff = DIFFICULTY.EASY_DIFFICULTY
 
             }
             DIFFICULTY.MEDIUM_DIFFICULTY.id -> {
-                diff= DIFFICULTY.MEDIUM_DIFFICULTY
+                diff = DIFFICULTY.MEDIUM_DIFFICULTY
 
             }
             else -> {
-                diff= DIFFICULTY.HARD_DIFFICULTY
+                diff = DIFFICULTY.HARD_DIFFICULTY
             }
         }
-        NUMBER_OF_BLOCKS=diff.NUMBER_OF_BLOCKS
-        NUMBER_TO_REMEMBER=diff.INITIAL_BLOCKS_TO_REMEMBER
-        currentNumberToRemember=NUMBER_TO_REMEMBER
+        NUMBER_OF_BLOCKS = diff.NUMBER_OF_BLOCKS
+        NUMBER_TO_REMEMBER = diff.INITIAL_BLOCKS_TO_REMEMBER
+        currentNumberToRemember = NUMBER_TO_REMEMBER
+        return diff
+
     }
 
     override fun onResume() {
@@ -150,21 +152,22 @@ class GameActivity : Activity() {
         // Lock all the blocks so that the user does not click while the computer is
         unlockAllBlocks(false)
 
-        // Iterator for the current pattern
-        iter = patternToMatch.iterator()
+
 
         // If this method has been called as a restart of the current round, this means that the user
         // has entered the wrong pattern for the current round and can try again
         if (!restart) {
-            var currRound = TappingRound(numRounds++, NUMBER_OF_BLOCKS, patternToMatch)
-            rounds.add(currRound)
+            gameSession.addRound(patternToMatch)
         }
 
+        // Iterator for the current pattern
+        iter = patternToMatch.iterator()
+
         // Update the number of tries left for the current round
-        rounds.last().useTry()
+        gameSession.tryRound()
 
         // Update the text view with the new value
-        setNumberOfTries(rounds.last().numTriesLeft)
+        setNumberOfTries(gameSession.getNumberOfTriesLeftForCurrentRound())
 
         // Call this method that taps the blocks mentioned in the pattern
         tapBlocks(patternToMatch)
@@ -172,13 +175,13 @@ class GameActivity : Activity() {
 
     private fun tapBlocks(patternToMatch: HashSet<Int>) {
         var handle = Handler()
-        var i = patternToMatch.iterator()
+        var iteratorForTappingBlocks = patternToMatch.iterator()
 
         // runnable object that taps the blocks every 1 second
         val runnable = object : Runnable {
             override fun run() {
-                if (i.hasNext()) {
-                    var block = recyclerView[i.next()]
+                if (iteratorForTappingBlocks.hasNext()) {
+                    var block = recyclerView[iteratorForTappingBlocks.next()]
                     block.performClick()
                     handle.postDelayed(this, 1000)
                 } else {
@@ -194,7 +197,7 @@ class GameActivity : Activity() {
     fun recordUserInput() {
         // User's turn to enter their pattern.
         // We provide the user to restart the game at this point. Can be commented out if not needed
-        resetButton.isEnabled=true
+        resetButton.isEnabled = true
 
         // Unlock all the blocks for the user to tap blocks
         unlockAllBlocks(true)
@@ -223,35 +226,38 @@ class GameActivity : Activity() {
 
         // If the user has correctly entered, then allow them to go the next round by enabling the
         // next button and increasing the number of blocks to remember in the next round by 1
-        if (rounds.last().correctlyEntered) {
+        if (gameSession.checkIfUserWonCurrentRound()) {
             nextButton.isEnabled = true
             currentNumberToRemember++
+            gameSession.endSession(mTimerTotal)
         } else {
 //            If the user has inputted the wrong pattern, check if they have any more tries left
 //            If they do not have any tries left, then the game is over and disable the next button
-            if (rounds.last().numTriesLeft <= 0) {
+            if (!gameSession.getTheLatestRound().areThereTriesLeft()) {
                 resetButton.isEnabled = true
                 nextButton.isEnabled = false
-                var complete = Intent(this, FinishActivity::class.java)
-                complete.putExtra("rounds", numRounds)
-                complete.putExtra("roundData", roundData)
-                startActivity(complete)
+                gameSession.endSession(mTimerTotal)
+
+                var completeResults = Intent(this, FinishActivity::class.java)
+                completeResults.putExtra("rounds", gameSession.getNumberOfRoundsPlayed())
+                completeResults.putExtra("roundData", blocksData)
+                startActivity(completeResults)
             } else {
 //                else the start the same round again
-                startRound(rounds.last().getPatternToRemember(), true)
+                startRound(gameSession.getTheLatestPatternToRemember(), true)
             }
 
         }
 //Stop timer for the last round and update the time for the current round
-        stopTimer(rounds.last().correctlyEntered)
-        rounds.last().endRound(mTimerTerm)
+        stopTimer(gameSession.checkIfUserWonCurrentRound())
+        gameSession.endTheCurrentRound(mTimerTerm)
 
     }
 
     fun resetGame() {
 //        Reset to the default values
-        currentNumberToRemember = NUMBER_TO_REMEMBER
-        rounds.clear()
+        gameSession = GameSession(difficulty)
+        gameSessions.add(gameSession)
         //Timer Clean
         timerClean()
     }
@@ -271,35 +277,28 @@ class GameActivity : Activity() {
         }
     }
 
-//    Record a single user tap. Method associated the tap with information about the tap
-    fun recordTap(set: HashSet<Int>, position: Int): Boolean {
-        val milliRoundTime = TimeUnit.MILLISECONDS.toSeconds(SystemClock.elapsedRealtime() - mTimer.base).toString()
+    //    Record a single user tap. Method associated the tap with information about the tap
+    @SuppressLint("NewApi")
+    fun recordTap(position: Int): Boolean {
+
+        val milliRoundTime = SystemClock.elapsedRealtime() - mTimer.base
         val dateFormatter = SimpleDateFormat("MM/dd/yyyy hh:mm:ss")
         dateFormatter.setLenient(false)
-        val s = dateFormatter.format(Date())
-        //Log.i("ASDF", s + ", Click: " + position.toString() + ", elapsedRoundTime: " + milliRoundTime + ", BlocksToRmr: " + currentNumberToRemember + " <--- INCORRECT")
 
-
-    if (!iter.hasNext()) {
-            Toast.makeText(this, "Incorrect Sequence - Exceeded", Toast.LENGTH_LONG)
+        val wasItCorrectlyTapped = gameSession.addTap(position, milliRoundTime)
+        return if (!wasItCorrectlyTapped) {
+            Toast.makeText(this, "Incorrect Sequence", Toast.LENGTH_LONG)
                 .show()
-            roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, false)))
-            return false
+            false
         } else {
-            rounds.last().stampIt()
-            if (iter.next() != position) {
-                Toast.makeText(this, "Incorrect Sequence", Toast.LENGTH_LONG).show()
-                roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, false)))
-                return false
-            }
-
-            roundData.add((RoundData(s, position, milliRoundTime, currentNumberToRemember, true)))
-            set.add(position)
-            return true
+            if (gameSession.checkIfUserWonCurrentRound())
+                Toast.makeText(this, "You got this correct", Toast.LENGTH_LONG)
+                    .show()
+            true
         }
-
     }
-//Generate a random sequence with the current number to remember
+
+    //Generate a random sequence with the current number to remember
     fun generateRandom(): HashSet<Int> {
         val k = currentNumberToRemember
         var retSet = HashSet<Int>()
@@ -318,11 +317,11 @@ class GameActivity : Activity() {
 
                 if (it.isClickable) {
                     it.backgroundTintList = getColorStateList(R.color.block_color_recording_pattern)
-                    if (!recordTap(drawnPattern, i)) {
+
+                    if (!recordTap(i)) {
                         doneRecording()
                     } else {
-                        if (!iter.hasNext()) {
-                            rounds.last().correctlyEntered = true
+                        if (gameSession.checkIfUserWonCurrentRound()) {
                             doneRecording()
                         }
                         it.isClickable = !it.isClickable
@@ -397,7 +396,7 @@ class GameActivity : Activity() {
 
     }
 
-    fun setNumberOfTries(triesLeft:Int){
-        numTriesTextView.text="${resources.getString(R.string.tries_left)} ${triesLeft}"
+    fun setNumberOfTries(triesLeft: Int) {
+        numTriesTextView.text = "${resources.getString(R.string.tries_left)} ${triesLeft}"
     }
 }
