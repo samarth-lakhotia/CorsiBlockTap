@@ -10,7 +10,7 @@ import android.widget.TextView
 class CountDownTimerActivity : Activity() {
 
     private lateinit var mCountDownTimer:TextView
-    private lateinit var timer:CrossCountDownTimer
+    private lateinit var mTimer:CrossCountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,8 +18,8 @@ class CountDownTimerActivity : Activity() {
 
         mCountDownTimer = findViewById(R.id.textView_countdown) as TextView
 
-        timer = CrossCountDownTimer(5000, 1000)
-        timer.start()
+        mTimer = CrossCountDownTimer(5000, 1000)
+        mTimer.start()
         Handler().postDelayed({
             this.setResult(RESULT_OK,Intent(this, MainActivity::class.java))
             this.finish()
