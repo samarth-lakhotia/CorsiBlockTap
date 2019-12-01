@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "833847659801",
+    "firebase_url": "https://corsiblocktapping.firebaseio.com",
+    "project_id": "corsiblocktapping",
+    "storage_bucket": "corsiblocktapping.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833847659801:android:38b12e73f88b700ee48988",
+        "android_client_info": {
+          "package_name": "com.example.corsiblocktappingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "833847659801-2sivf0qjrsea3s4tqqmohf51peibm247.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVUaXxcvfzHLq7eUJEy9bb80shjCvXvpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "833847659801-2sivf0qjrsea3s4tqqmohf51peibm247.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

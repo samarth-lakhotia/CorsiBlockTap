@@ -9,6 +9,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import models.BlockTap
 
 import java.io.FileWriter
@@ -18,21 +21,25 @@ class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button
     private lateinit var finishText: TextView
     private lateinit var csvButton: TextView
-    private val csvHeader = "Datetime,TapPosition,ElapsedRoundTime(s),BlocksToRmr,Correct"
+    private lateinit var firebaseButton: TextView
+    private val csvHeader = "TapTimestamp,TapPositionWithRespectToGrid,TimeTappedSinceBeginning(s),WasItCorrectlyTapped"
+    private lateinit var dbReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finish)
 
-        val roundData = intent.getSerializableExtra("roundData") as ArrayList<BlockTap>
+        val tapData = intent.getSerializableExtra("roundData") as ArrayList<BlockTap>
         // writes to /storage/emulated/0/Android/data/com.example.corsiblocktappingapp/files/MyFileStorage because
-        // getExternalStorageDirectory is now deprevated. This folder can be accessed via ES FileExplorer.
+        // getExternalStorageDirectory is now deprecated. This folder can be accessed via ES FileExplorer.
         val fileWriter = FileWriter(getExternalFilesDir("MyFileStorage").toString() + "/DataFromSession.csv")
 
         finishText = findViewById(R.id.finish_text)
         playButton = findViewById(R.id.play_button)
         csvButton = findViewById(R.id.csv_button)
+        firebaseButton = findViewById(R.id.firebase_button)
         finishText.gravity = Gravity.CENTER
+        firebaseButton.text = "Upload to Firebase"
         finishText.text = """You reached Round: ${intent.getIntExtra("rounds", 0)}"""
         playButton.text = "Try Again"
         csvButton.text = "Export to csv"
@@ -47,22 +54,24 @@ class FinishActivity : AppCompatActivity() {
                 fileWriter.append(csvHeader)
                 fileWriter.append('\n')
 
-                for (data in roundData) {
+                for (data in tapData) {
                     fileWriter.append(data.tapTimestamp.toString())
                     fileWriter.append(',')
                     fileWriter.append(data.tapPositionWithRespectToGrid.toString())
                     fileWriter.append(',')
                     fileWriter.append(data.timeTappedSinceBeginning.toString())
                     fileWriter.append(',')
-//                    fileWriter.append(data.currentBlocksToRmr.toString())
-//                    fileWriter.append(',')
                     fileWriter.append(data.wasItCorrectlyTapped.toString())
                     fileWriter.append('\n')
                 }
 
                 Log.i("ASDF", "Wrote to CSV successfully!")
+                Toast.makeText(this, "Wrote to CSV successfully", Toast.LENGTH_LONG)
+                    .show()
             } catch (e: Exception) {
                 Log.i("ASDF", "Did not write to CSV successfully!")
+                Toast.makeText(this, "Did not write to CSV successfully", Toast.LENGTH_LONG)
+                    .show()
                 Log.i("ASDF", e.printStackTrace().toString())
             } finally {
                 try {
@@ -70,11 +79,28 @@ class FinishActivity : AppCompatActivity() {
                     fileWriter.close()
                 } catch (e: IOException) {
                     Log.i("ASDF", "flushing/closing Error!")
+                    Toast.makeText(this, "Closing Error", Toast.LENGTH_LONG)
+                        .show()
                     Log.i("ASDF", e.printStackTrace().toString())
                 }
             }
         }
+
+        dbReference = FirebaseDatabase.getInstance().getReference("user")
+        firebaseButton.setOnClickListener {
+            Toast.makeText(this, "Uploading data to Firebase", Toast.LENGTH_LONG)
+                .show()
+
+
+            for (data in tapData) {
+                dbReference.setValue("Hello, world!")
+            }
+
+
+        }
     }
+
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.

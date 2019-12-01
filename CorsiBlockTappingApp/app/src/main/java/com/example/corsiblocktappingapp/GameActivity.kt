@@ -23,6 +23,7 @@ import models.GameSession
 import kotlin.collections.HashSet
 import kotlin.random.Random
 import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -43,7 +44,6 @@ class GameActivity : Activity() {
     private lateinit var difficulty: DIFFICULTY
     val blocksData = ArrayList<BlockTap>()
     private lateinit var iter: Iterator<Int>
-    private var numRounds = 0
     private var mTimerRunning: Boolean = false
     private var mTimerTerm: Long = 0
     private var mTimerTotal: Long = 0
@@ -280,10 +280,10 @@ class GameActivity : Activity() {
     //    Record a single user tap. Method associated the tap with information about the tap
     @SuppressLint("NewApi")
     fun recordTap(position: Int): Boolean {
-
         val milliRoundTime = SystemClock.elapsedRealtime() - mTimer.base
         val dateFormatter = SimpleDateFormat("MM/dd/yyyy hh:mm:ss")
         dateFormatter.setLenient(false)
+        val s = dateFormatter.format(Date())
 
         val wasItCorrectlyTapped = gameSession.addTap(position, milliRoundTime)
         return if (!wasItCorrectlyTapped) {
