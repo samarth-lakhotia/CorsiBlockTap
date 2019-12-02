@@ -17,6 +17,9 @@ class GameSession(difficulty: DIFFICULTY){
         rounds.add(round)
     }
 
+    fun getInitialNumberOfBlocksToRemember():Int{
+        return currNumberOfBlocksToRemember
+    }
     fun getTheLatestRound(): Round {
         return rounds.last()
     }

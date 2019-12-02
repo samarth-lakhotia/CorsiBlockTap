@@ -258,6 +258,7 @@ class GameActivity : Activity() {
 //        Reset to the default values
         gameSession = GameSession(difficulty)
         gameSessions.add(gameSession)
+        currentNumberToRemember=gameSession.getInitialNumberOfBlocksToRemember()
         //Timer Clean
         timerClean()
     }
