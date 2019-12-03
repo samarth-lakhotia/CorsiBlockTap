@@ -6,24 +6,30 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:background="#f0f0f0">
 <RelativeLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true">
+
     <Button
         android:id="@+id/play_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:width="250dp"
-        android:text="@string/play_button" />
+        android:text="@string/play_button"
+        android:backgroundTint="@color/button_colors"/>
+
     <Button
         android:id="@+id/settings_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="75dp"
         android:layout_below="@id/play_button"
+        android:layout_marginTop="20dp"
         android:width="250dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/game_settings" />
+        android:text="@string/game_settings"
+        android:backgroundTint="@color/button_colors"
+        />
 </RelativeLayout>
 </android.widget.RelativeLayout>
