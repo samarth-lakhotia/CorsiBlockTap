@@ -11,7 +11,7 @@ class GameSession(difficulty: DIFFICULTY): Serializable{
 
     fun addRound(pattern: HashSet<Int>){
         var round = Round(
-            rounds.size,
+            rounds.size+1,
             currNumberOfBlocksToRemember,
             pattern
         )

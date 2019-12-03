@@ -109,21 +109,21 @@ class GameActivity : Activity() {
     }
 
     private fun setDifficultyConfigurations(): DIFFICULTY {
-        var difficulty = userPreferences.getInt("difficulty", -1)
-        var diff: DIFFICULTY
-        when (difficulty) {
-            DIFFICULTY.EASY_DIFFICULTY.id -> {
-                diff = DIFFICULTY.EASY_DIFFICULTY
-
-            }
-            DIFFICULTY.MEDIUM_DIFFICULTY.id -> {
-                diff = DIFFICULTY.MEDIUM_DIFFICULTY
-
-            }
-            else -> {
-                diff = DIFFICULTY.HARD_DIFFICULTY
-            }
-        }
+//        var difficulty = userPreferences.getInt("difficulty", -1)
+        var diff: DIFFICULTY = DIFFICULTY.MEDIUM_DIFFICULTY
+//        when (difficulty) {
+//            DIFFICULTY.EASY_DIFFICULTY.id -> {
+//                diff = DIFFICULTY.EASY_DIFFICULTY
+//
+//            }
+//            DIFFICULTY.MEDIUM_DIFFICULTY.id -> {
+//                diff = DIFFICULTY.MEDIUM_DIFFICULTY
+//
+//            }
+//            else -> {
+//                diff = DIFFICULTY.HARD_DIFFICULTY
+//            }
+//        }
         NUMBER_OF_BLOCKS = diff.NUMBER_OF_BLOCKS
         NUMBER_TO_REMEMBER = diff.INITIAL_BLOCKS_TO_REMEMBER
         currentNumberToRemember = NUMBER_TO_REMEMBER

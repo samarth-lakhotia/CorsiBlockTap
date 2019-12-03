@@ -26,25 +26,24 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
         playButton = findViewById(R.id.play_button)
-        settingsButton = findViewById(R.id.settings_button)
-
-        prefs =getSharedPreferences("configuration", Context.MODE_PRIVATE)
+//        settingsButton = findViewById(R.id.settings_button)
+//        prefs =getSharedPreferences("configuration", Context.MODE_PRIVATE)
 //        prefs.edit().clear().apply()
 
         playButton.setOnClickListener {
-            if(prefs.getInt("difficulty",-1) != -1) {
+//            if(prefs.getInt("difficulty",-1) != -1) {
                 //Start the count down timer, the test will start within the countdown activity in 5 seconds
                 startActivity(Intent(this, CountDownTimerActivity::class.java))
-
-            } else{
-                val intent = Intent()
-                intent.putExtra("START_GAME",true)
-                intent.setClass(this, SettingsActivity::class.java)
-                startActivity(intent)
-            }
+//
+//            } else{
+//                val intent = Intent()
+//                intent.putExtra("START_GAME",true)
+//                intent.setClass(this, SettingsActivity::class.java)
+//                startActivity(intent)
+//            }
         }
 
-        settingsButton.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java))  }
+//        settingsButton.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java))  }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

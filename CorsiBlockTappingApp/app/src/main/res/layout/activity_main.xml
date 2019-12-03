@@ -29,6 +29,7 @@
         android:layout_marginTop="20dp"
         android:width="250dp"
         android:text="@string/game_settings"
+        android:visibility="gone"
         android:backgroundTint="@color/button_colors"
         />
 </RelativeLayout>
