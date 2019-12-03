@@ -30,6 +30,7 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.util.JsonWriter
 import android.widget.Chronometer
 import models.GameSession
+import models.Round
 import org.json.JSONObject
 
 
@@ -38,7 +39,7 @@ class FinishActivity : AppCompatActivity() {
     private lateinit var finishText: TextView
     private lateinit var csvButton: TextView
     private lateinit var firebaseButton: TextView
-    private val csvHeader = "Game Session, Number of Rounds, Difficulty, Rounds' Details, Total Time Taken"
+    private val csvHeader = "Round, Difficulty, Round Details, Additional Info"
     private lateinit var dbReference: DatabaseReference
 
     //Vars for the total time
@@ -80,17 +81,8 @@ class FinishActivity : AppCompatActivity() {
             try {
                 fileWriter.append(csvHeader)
                 fileWriter.append('\n')
-/*
-                for (data in gameData) {
-                    fileWriter.append(data.tapTimestamp.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.tapPositionWithRespectToGrid.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.timeTappedSinceBeginning.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.wasItCorrectlyTapped.toString())
-                    fileWriter.append('\n')
-                }*/
+
+
                 fileWriter.append(gameData.toString())
 
                 Log.i("CSV", "Wrote to CSV successfully!")
@@ -119,6 +111,7 @@ class FinishActivity : AppCompatActivity() {
             Toast.makeText(this, "Uploading data to Firebase", Toast.LENGTH_LONG)
                 .show()
 
+            Log.i("ASDF", gameData.toString())
             dbReference.setValue(gameData)
         }
 
