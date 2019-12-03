@@ -57,6 +57,6 @@ class GameSession(difficulty: DIFFICULTY): Serializable{
     override fun toString(): String {
         var roundsDetails = ""
         rounds.forEach { roundsDetails+=it.toString() }
-        return """Session,${getNumberOfRoundsPlayed()},${difficultyOfGame},${roundsDetails},${totalTime}"""
+        return """${getNumberOfRoundsPlayed()},${difficultyOfGame},${roundsDetails},${totalTime}"""
     }
 }

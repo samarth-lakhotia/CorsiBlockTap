@@ -27,7 +27,9 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.util.JsonWriter
 import models.GameSession
+import org.json.JSONObject
 
 
 class FinishActivity : AppCompatActivity() {
@@ -149,5 +151,11 @@ class FinishActivity : AppCompatActivity() {
     }
     override fun onBackPressed() {
         startActivity(Intent(this, MainActivity::class.java))
+    }
+    fun getJSON(){
+        var jsobj=JSONObject()
+        jsobj.put("Session", {})
+
+
     }
 }

@@ -405,4 +405,5 @@ class GameActivity : Activity() {
     override fun onBackPressed() {
         startActivity(Intent(this, MainActivity::class.java))
     }
+
 }

@@ -15,6 +15,6 @@ class BlockTap(position:Int, tapTime:LocalDateTime, elapsedTime:Long) : Serializ
     }
 
     override fun toString(): String {
-        return "Tap [Time Stamped On=" + tapTimestamp + "; Position tapped on=" + tapPositionWithRespectToGrid +"; Seconds passed since beginning=" + timeTappedSinceBeginning +"; Correctness of Tap=" + wasItCorrectlyTapped + "]"
+        return """{"Time Stamped On":$tapTimestamp, Position Tapped On:$tapPositionWithRespectToGrid, Time(in ms) since beginning of round:${timeTappedSinceBeginning}, Correct Tap?:${wasItCorrectlyTapped}}"""
     }
 }

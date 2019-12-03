@@ -69,6 +69,6 @@ class Round(roundNumber: Int, blocksToRemember: Int, patternToRemember: HashSet<
     override fun toString(): String {
         var roundDetails = ""
         userTaps.forEach{ roundDetails+=it.toString()}
-        return """[Round Number=${roundNumber};Number of Blocks to memorize=${numBlocksToRemember};Tries Used= ${Constants.NUMBER_OF_TRIES-numTriesLeft};Tap Details=${roundDetails}; Total Time Taken= ${totalTimeTaken}]"""
+        return """{"Round Number":"${roundNumber}","Number of Blocks to memorize":"${numBlocksToRemember}","Tries Used":"${Constants.NUMBER_OF_TRIES-numTriesLeft}","Tap Details":"${roundDetails}","Total Time Taken":"${totalTimeTaken}"}"""
     }
 }
