@@ -45,11 +45,11 @@ class GameActivity : Activity() {
     private lateinit var difficulty: DIFFICULTY
     val blocksData = ArrayList<BlockTap>()
     private lateinit var iter: Iterator<Int>
+
+    //Vars for Timer
     private var mTimerRunning: Boolean = false
     private var mTimerTerm: Long = 0
     private var mTimerTotal: Long = 0
-
-    //Var for Timer
 
     private var NUMBER_OF_BLOCKS = -1
     private var NUMBER_TO_REMEMBER = -1
@@ -84,9 +84,13 @@ class GameActivity : Activity() {
 
         //Timer Set Up
         mTimerTextView = findViewById(R.id.total_time)
+        mTimer = findViewById(R.id.game_timer)
+
+        //Set the format of the total timer to "Total Time: %s"
         mTimerTextView.format = "Total Time: %s"
         mTimerTextView.base = SystemClock.elapsedRealtime()
-        mTimer = findViewById(R.id.game_timer)
+
+        //Set the format of each round timer to "Time: %s"
         mTimer.format = "Time: %s"
         mTimer.base = SystemClock.elapsedRealtime()
 
@@ -216,9 +220,10 @@ class GameActivity : Activity() {
 
     fun doneRecording() {
         // Once user has entered their pattern, this method is called to wind up the round and proceed
-//        next round or restart the game
+        // next round or restart the game
 
-
+        // Stop timer for the last round and update the time for the current round
+        stopTimer(gameSession.checkIfUserWonCurrentRound())
 
         // Lock all the blocks so that user does not play around while the game is not in any round
         unlockAllBlocks(false)
@@ -242,6 +247,9 @@ class GameActivity : Activity() {
                 completeResults.putExtra("rounds", gameSession.getNumberOfRoundsPlayed())
                 Log.i("RESULTS",gameSession.toString())
                 completeResults.putExtra("GameData", gameSession.toString())
+
+                // Pass the total time to the intent
+                completeResults.putExtra("TotalTime", mTimerTextView.text)
                 startActivity(completeResults)
             } else {
 //                else the start the same round again
@@ -249,8 +257,7 @@ class GameActivity : Activity() {
             }
 
         }
-//Stop timer for the last round and update the time for the current round
-        stopTimer(gameSession.checkIfUserWonCurrentRound())
+
         gameSession.endTheCurrentRound(mTimerTerm)
 
     }
@@ -260,7 +267,8 @@ class GameActivity : Activity() {
         gameSession = GameSession(difficulty)
         gameSessions.add(gameSession)
         currentNumberToRemember=gameSession.getInitialNumberOfBlocksToRemember()
-        //Timer Clean
+
+        // Timer Clean
         timerClean()
     }
 
@@ -354,8 +362,9 @@ class GameActivity : Activity() {
         }
     }
 
-    //Timer Functions
-    fun startTimer() {
+    // Timer Functions
+    // Start the timer
+    private fun startTimer() {
         if (!mTimerRunning) {
             mTimerTerm = 0
             mTimer.base = SystemClock.elapsedRealtime() - mTimerTerm
@@ -364,8 +373,9 @@ class GameActivity : Activity() {
         }
     }
 
-    //Timer Functions
-    fun stopTimer(correct: Boolean): Long {
+    // Timer Functions
+    // Stop the timer
+    private fun stopTimer(correct: Boolean): Long {
         if (mTimerRunning) {
             mTimer.stop()
             when (correct) {
@@ -376,20 +386,24 @@ class GameActivity : Activity() {
             mTimer.base = SystemClock.elapsedRealtime()
         } else mTimerTerm = 0
 
-        //Timer Text View
+
         mTimerTotal += mTimerTerm
+
+        // Timer Text View
         timerTextViewF()
 
         return mTimerTerm
     }
 
-    //Timer TextView Function
-    fun timerTextViewF() {
+    // Timer TextView Function
+    // Set the TextView of the timer related to the total time for all rounds
+    private fun timerTextViewF() {
         mTimerTextView.base = SystemClock.elapsedRealtime() - mTimerTotal
     }
 
-    //Timer Clean
-    fun timerClean() {
+    // Timer Clean
+    // Clean and reset the timer
+    private fun timerClean() {
         mTimerTerm = 0
         mTimerTotal = 0
         mTimer.base = SystemClock.elapsedRealtime()
