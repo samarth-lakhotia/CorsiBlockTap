@@ -44,6 +44,6 @@
         android:layout_below="@id/difficulty_level"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-/>
+        android:backgroundTint="@color/button_colors"/>
 
 </RelativeLayout>
