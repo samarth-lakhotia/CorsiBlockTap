@@ -12,6 +12,7 @@ class CountDownTimerActivity : Activity() {
     private lateinit var mCountDownTimer:TextView
     private lateinit var mTimer:CrossCountDownTimer
 
+    // This is the count down activity after user click play button in the main page
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_countdown)
@@ -20,6 +21,8 @@ class CountDownTimerActivity : Activity() {
 
         mTimer = CrossCountDownTimer(5000, 1000)
         mTimer.start()
+
+        //delay for 5 seconds to start the game
         Handler().postDelayed({
 //            this.setResult(RESULT_OK,Intent(this, MainActivity::class.java))
 //            this.finish()
@@ -29,7 +32,7 @@ class CountDownTimerActivity : Activity() {
     }
 
 
-
+    //The inner count down class for the count down timer (mTimer)
     inner class CrossCountDownTimer(millisInFuture: Long, countDownInterval: Long) : CountDownTimer(millisInFuture, countDownInterval) {
 
         override fun onFinish() {
@@ -38,6 +41,8 @@ class CountDownTimerActivity : Activity() {
 
         override fun onTick(millisUntilFinished: Long) {
             mCountDownTimer.textSize = 60f
+
+            //Show the word "Start!" at the last second
             if (millisUntilFinished / 1000 != 0L)
                 mCountDownTimer.text = (millisUntilFinished / 1000).toString() + ""
             else mCountDownTimer.text = "Start!"

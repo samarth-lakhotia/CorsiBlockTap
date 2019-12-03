@@ -28,6 +28,7 @@ import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.util.JsonWriter
+import android.widget.Chronometer
 import models.GameSession
 import org.json.JSONObject
 
@@ -39,6 +40,10 @@ class FinishActivity : AppCompatActivity() {
     private lateinit var firebaseButton: TextView
     private val csvHeader = "Game Session, Number of Rounds, Difficulty, Rounds' Details, Total Time Taken"
     private lateinit var dbReference: DatabaseReference
+
+    //Vars for the total time
+    private lateinit var totalTime:String
+    private lateinit var totalTimeTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +58,12 @@ class FinishActivity : AppCompatActivity() {
         playButton = findViewById(R.id.play_button)
         csvButton = findViewById(R.id.csv_button)
         firebaseButton = findViewById(R.id.firebase_button)
+
+        //Getting Total time
+        totalTime = intent.getStringExtra("TotalTime")
+        totalTimeTextView = findViewById(R.id.finish_time)
+        totalTimeTextView.gravity = Gravity.CENTER
+        totalTimeTextView.text = totalTime
 
         finishText.gravity = Gravity.CENTER
         finishText.text = """You reached Round: ${intent.getIntExtra("rounds", 0)}"""

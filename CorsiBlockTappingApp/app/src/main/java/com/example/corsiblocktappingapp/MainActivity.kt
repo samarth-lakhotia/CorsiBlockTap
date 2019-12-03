@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         playButton.setOnClickListener {
             if(prefs.getInt("difficulty",-1) != -1) {
+                //Start the count down timer, the test will start within the countdown activity in 5 seconds
                 startActivity(Intent(this, CountDownTimerActivity::class.java))
 
             } else{
