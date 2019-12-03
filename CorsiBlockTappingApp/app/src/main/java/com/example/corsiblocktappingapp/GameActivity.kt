@@ -71,7 +71,7 @@ class GameActivity : Activity() {
         gameSessions.add(gameSession)
 
         nextButton = findViewById(R.id.next_button)
-        nextButton.setOnClickListener { startRound(generateRandom()) }
+        nextButton.setOnClickListener { resetAllBocks();startRound(generateRandom()) }
 
         numTriesTextView = findViewById(R.id.num_tries_view)
 
@@ -218,9 +218,7 @@ class GameActivity : Activity() {
         // Once user has entered their pattern, this method is called to wind up the round and proceed
 //        next round or restart the game
 
-        // Go back to the default listener
-        setPatternSetterListener()
-        resetAllBocks()
+
 
         // Lock all the blocks so that user does not play around while the game is not in any round
         unlockAllBlocks(false)
@@ -232,6 +230,7 @@ class GameActivity : Activity() {
             currentNumberToRemember++
             gameSession.endSession(mTimerTotal)
         } else {
+            resetAllBocks()
 //            If the user has inputted the wrong pattern, check if they have any more tries left
 //            If they do not have any tries left, then the game is over and disable the next button
             if (!gameSession.getTheLatestRound().areThereTriesLeft()) {
@@ -401,5 +400,9 @@ class GameActivity : Activity() {
 
     fun setNumberOfTries(triesLeft: Int) {
         numTriesTextView.text = "${resources.getString(R.string.tries_left)} ${triesLeft}"
+    }
+
+    override fun onBackPressed() {
+        startActivity(Intent(this, MainActivity::class.java))
     }
 }

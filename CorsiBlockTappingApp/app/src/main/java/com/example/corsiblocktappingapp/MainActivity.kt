@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         playButton.setOnClickListener {
             if(prefs.getInt("difficulty",-1) != -1) {
-                startActivityForResult(Intent(this, CountDownTimerActivity::class.java), REQUEST_CODE_1)
+                startActivity(Intent(this, CountDownTimerActivity::class.java))
 
             } else{
                 val intent = Intent()

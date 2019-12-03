@@ -21,8 +21,9 @@ class CountDownTimerActivity : Activity() {
         mTimer = CrossCountDownTimer(5000, 1000)
         mTimer.start()
         Handler().postDelayed({
-            this.setResult(RESULT_OK,Intent(this, MainActivity::class.java))
-            this.finish()
+//            this.setResult(RESULT_OK,Intent(this, MainActivity::class.java))
+//            this.finish()
+            startActivity(Intent(baseContext, GameActivity::class.java))
         }, 5000)
 
     }

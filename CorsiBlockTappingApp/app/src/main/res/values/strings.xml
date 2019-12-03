@@ -16,4 +16,5 @@
     <string name="hard">Hard</string>
     <string name="choose_difficulty">Choose Difficulty</string>
     <string name="game_settings">Game Settings</string>
+    <string name="back_to_home_page">Back to Home Page</string>
 </resources>
