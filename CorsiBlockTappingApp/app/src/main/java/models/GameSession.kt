@@ -1,8 +1,9 @@
 package models
 
 import com.example.corsiblocktappingapp.DIFFICULTY
+import java.io.Serializable
 
-class GameSession(difficulty: DIFFICULTY){
+class GameSession(difficulty: DIFFICULTY): Serializable{
     private var rounds: ArrayList<Round> = ArrayList()
     private var totalTime: Long? = null
     private var difficultyOfGame=difficulty
@@ -51,5 +52,11 @@ class GameSession(difficulty: DIFFICULTY){
 
     fun getNumberOfRoundsPlayed(): Int {
         return rounds.size
+    }
+
+    override fun toString(): String {
+        var roundsDetails = ""
+        rounds.forEach { roundsDetails+=it.toString() }
+        return """Session,${getNumberOfRoundsPlayed()},${difficultyOfGame},${roundsDetails},${totalTime}"""
     }
 }

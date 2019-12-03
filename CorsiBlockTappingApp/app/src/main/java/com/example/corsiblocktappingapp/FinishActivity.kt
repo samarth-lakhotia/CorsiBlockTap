@@ -27,7 +27,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
+import models.GameSession
 
 
 class FinishActivity : AppCompatActivity() {
@@ -35,14 +35,14 @@ class FinishActivity : AppCompatActivity() {
     private lateinit var finishText: TextView
     private lateinit var csvButton: TextView
     private lateinit var firebaseButton: TextView
-    private val csvHeader = "TapTimestamp,TapPositionWithRespectToGrid,TimeTappedSinceBeginning(ms),WasItCorrectlyTapped"
+    private val csvHeader = "Game Session, Number of Rounds, Difficulty, Rounds' Details, Total Time Taken"
     private lateinit var dbReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finish)
 
-        val tapData = intent.getSerializableExtra("roundData") as ArrayList<BlockTap>
+        val gameData = intent.getStringExtra("GameData")
         // writes to /storage/emulated/0/Android/data/com.example.corsiblocktappingapp/files/MyFileStorage because
         // getExternalStorageDirectory is now deprecated. This folder can be accessed via ES FileExplorer.
         val fileWriter = FileWriter(getExternalFilesDir("MyFileStorage").toString() + "/DataFromSession.csv")
@@ -67,35 +67,36 @@ class FinishActivity : AppCompatActivity() {
             try {
                 fileWriter.append(csvHeader)
                 fileWriter.append('\n')
+//
+//                for (data in tapData) {
+//                    fileWriter.append(data.tapTimestamp.toString())
+//                    fileWriter.append(',')
+//                    fileWriter.append(data.tapPositionWithRespectToGrid.toString())
+//                    fileWriter.append(',')
+//                    fileWriter.append(data.timeTappedSinceBeginning.toString())
+//                    fileWriter.append(',')
+//                    fileWriter.append(data.wasItCorrectlyTapped.toString())
+//                    fileWriter.append('\n')
+//                }
+                fileWriter.append(gameData.toString())
 
-                for (data in tapData) {
-                    fileWriter.append(data.tapTimestamp.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.tapPositionWithRespectToGrid.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.timeTappedSinceBeginning.toString())
-                    fileWriter.append(',')
-                    fileWriter.append(data.wasItCorrectlyTapped.toString())
-                    fileWriter.append('\n')
-                }
-
-                Log.i("ASDF", "Wrote to CSV successfully!")
+                Log.i("CSV", "Wrote to CSV successfully!")
                 Toast.makeText(this, "Wrote to CSV successfully", Toast.LENGTH_LONG)
                     .show()
             } catch (e: Exception) {
-                Log.i("ASDF", "Did not write to CSV successfully!")
+                Log.i("CSV", "Did not write to CSV successfully!")
                 Toast.makeText(this, "Did not write to CSV successfully", Toast.LENGTH_LONG)
                     .show()
-                Log.i("ASDF", e.printStackTrace().toString())
+                Log.i("CSV", e.printStackTrace().toString())
             } finally {
                 try {
                     fileWriter.flush()
                     fileWriter.close()
                 } catch (e: IOException) {
-                    Log.i("ASDF", "flushing/closing Error!")
+                    Log.i("CSV", "flushing/closing Error!")
                     Toast.makeText(this, "Closing Error", Toast.LENGTH_LONG)
                         .show()
-                    Log.i("ASDF", e.printStackTrace().toString())
+                    Log.i("CSV", e.printStackTrace().toString())
                 }
             }
         }
@@ -105,11 +106,7 @@ class FinishActivity : AppCompatActivity() {
             Toast.makeText(this, "Uploading data to Firebase", Toast.LENGTH_LONG)
                 .show()
 
-            tapData.forEach {
-                val key = dbReference.child("usersData").push().key
-                it.uuid = key!!
-                dbReference.child("taps").child(key).setValue(it)
-            }
+            dbReference.setValue(gameData)
         }
 
 

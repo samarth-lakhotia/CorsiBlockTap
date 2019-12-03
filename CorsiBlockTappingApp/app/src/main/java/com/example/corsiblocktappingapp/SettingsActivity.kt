@@ -11,6 +11,7 @@ import android.widget.Toast
 class SettingsActivity : Activity() {
     private lateinit var difficultyRadioGroup: RadioGroup
     private lateinit var pref: SharedPreferences
+    private val REQUEST_CODE_1=101
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         pref = getSharedPreferences("configuration", Context.MODE_PRIVATE)
@@ -34,9 +35,16 @@ class SettingsActivity : Activity() {
 
             if (intent.getBooleanExtra("START_GAME", false)) {
                 Toast.makeText(this, toastText + "Starting Game now...", Toast.LENGTH_LONG).show()
-                startActivity(Intent(this, GameActivity::class.java))
+                startActivityForResult(Intent(this, CountDownTimerActivity::class.java), REQUEST_CODE_1)
             } else {
                 Toast.makeText(this, toastText, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_CODE_1) {
+                startActivity(Intent(baseContext, GameActivity::class.java))
             }
         }
     }

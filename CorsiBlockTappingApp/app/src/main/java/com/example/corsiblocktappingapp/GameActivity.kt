@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
+import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.Chronometer
@@ -240,7 +241,8 @@ class GameActivity : Activity() {
 
                 var completeResults = Intent(this, FinishActivity::class.java)
                 completeResults.putExtra("rounds", gameSession.getNumberOfRoundsPlayed())
-                completeResults.putExtra("roundData", gameSession.getTheLatestRound().getUserTaps())
+                Log.i("RESULTS",gameSession.toString())
+                completeResults.putExtra("GameData", gameSession.toString())
                 startActivity(completeResults)
             } else {
 //                else the start the same round again

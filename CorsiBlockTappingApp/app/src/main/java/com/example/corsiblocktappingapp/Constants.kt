@@ -25,6 +25,7 @@ enum class DIFFICULTY {
 class Constants {
     companion object{
         const val COLS_IN_GRID=5
+        const val NUMBER_OF_TRIES=2
     }
 
 }
