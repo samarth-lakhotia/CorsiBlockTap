@@ -4,33 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#f0f0f0"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    tools:showIn="@layout/activity_main"
-    android:background="#f0f0f0">
-<RelativeLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true">
+    tools:showIn="@layout/activity_main">
 
-    <Button
-        android:id="@+id/play_button"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:width="250dp"
-        android:text="@string/play_button"
-        android:backgroundTint="@color/button_colors"/>
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
 
-    <Button
-        android:id="@+id/settings_button"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:layout_below="@id/play_button"
-        android:layout_marginTop="20dp"
-        android:width="250dp"
-        android:text="@string/game_settings"
-        android:visibility="gone"
-        android:backgroundTint="@color/button_colors"
-        />
-</RelativeLayout>
+        <Button
+            android:id="@+id/play_button"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:width="250dp"
+            android:backgroundTint="@color/button_colors"
+            android:text="@string/play_button" />
+
+        <Button
+            android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:layout_below="@id/play_button"
+            android:layout_marginTop="20dp"
+            android:width="250dp"
+            android:backgroundTint="@color/button_colors"
+            android:text="@string/game_settings"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/instructions"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="textStart"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="40dp"
+        android:text="How to play?\nUpon clicking the play button, you will see the computer draw out a pattern for you. Your tassk is to draw the same pattern that the computer drew for you. You get two tries to draw the correct patter. If it is correct you proceed to the next round by clicking next" />
 </android.widget.RelativeLayout>
