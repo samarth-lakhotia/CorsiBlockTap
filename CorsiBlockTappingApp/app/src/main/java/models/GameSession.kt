@@ -25,6 +25,10 @@ class GameSession(difficulty: DIFFICULTY): Serializable{
         return rounds.last()
     }
 
+    fun getRounds(): ArrayList<Round> {
+        return rounds
+    }
+
     fun tryRound(){
         getTheLatestRound().useTry()
     }
@@ -56,7 +60,9 @@ class GameSession(difficulty: DIFFICULTY): Serializable{
 
     override fun toString(): String {
         var roundsDetails = ""
-        rounds.forEach { roundsDetails+=it.toString() }
+        rounds.forEach {
+            roundsDetails+=it.toString()
+        }
         return """${getNumberOfRoundsPlayed()},${difficultyOfGame},${roundsDetails},${totalTime}"""
     }
 }
