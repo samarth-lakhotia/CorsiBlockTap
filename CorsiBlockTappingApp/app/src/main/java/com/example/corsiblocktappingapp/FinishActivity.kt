@@ -69,17 +69,17 @@ class FinishActivity : AppCompatActivity() {
             try {
                 fileWriter.append(csvHeader)
                 fileWriter.append('\n')
-//
-//                for (data in tapData) {
-//                    fileWriter.append(data.tapTimestamp.toString())
-//                    fileWriter.append(',')
-//                    fileWriter.append(data.tapPositionWithRespectToGrid.toString())
-//                    fileWriter.append(',')
-//                    fileWriter.append(data.timeTappedSinceBeginning.toString())
-//                    fileWriter.append(',')
-//                    fileWriter.append(data.wasItCorrectlyTapped.toString())
-//                    fileWriter.append('\n')
-//                }
+/*
+                for (data in gameData) {
+                    fileWriter.append(data.tapTimestamp.toString())
+                    fileWriter.append(',')
+                    fileWriter.append(data.tapPositionWithRespectToGrid.toString())
+                    fileWriter.append(',')
+                    fileWriter.append(data.timeTappedSinceBeginning.toString())
+                    fileWriter.append(',')
+                    fileWriter.append(data.wasItCorrectlyTapped.toString())
+                    fileWriter.append('\n')
+                }*/
                 fileWriter.append(gameData.toString())
 
                 Log.i("CSV", "Wrote to CSV successfully!")
