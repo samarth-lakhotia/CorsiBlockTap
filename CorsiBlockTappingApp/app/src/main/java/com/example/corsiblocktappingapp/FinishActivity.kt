@@ -2,21 +2,23 @@ package com.example.corsiblocktappingapp
 
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-
 import java.io.FileWriter
 import java.io.IOException
-import android.net.NetworkCapabilities
-import android.net.ConnectivityManager
-import android.os.Build
+
 
 // LOGIN INFORMATION FOR TEMPORARY FIREBASE ACCOUNT THAT WAS CREATED:
 // user: CorsiTapping@gmail.com
@@ -68,6 +70,14 @@ class FinishActivity : AppCompatActivity() {
         // writing the data from each round to a csv file
         jsonButton.setOnClickListener {
             writeJSONFile(jsonString)
+            var intent = Intent()
+            intent.setAction(Intent.ACTION_GET_CONTENT)
+//            var uri = Uri.fromFile(getExternalFilesDir("MyFileStorage"))
+            val apkURI = FileProvider.getUriForFile(
+                this, applicationContext.packageName.toString() + ".provider", getExternalFilesDir("MyFileStorage")!!)
+            intent.setDataAndType(apkURI, "*/*")
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(Intent.createChooser(intent,"Open Folder"))
         }
 
         // getting the reference to the FirebaseDatabase
@@ -107,10 +117,8 @@ class FinishActivity : AppCompatActivity() {
         try {
 
             jsonFileWriter.write(jsonString!!)
-            jsonFileWriter.flush()
-            jsonFileWriter.close()
 
-            Log.i("JSON", "Wrote to CSV successfully!")
+            Log.i("JSON", "Wrote to JSON successfully!")
             Toast.makeText(this, "Wrote to JSON successfully", Toast.LENGTH_LONG)
                 .show()
         } catch (e: Exception) {
