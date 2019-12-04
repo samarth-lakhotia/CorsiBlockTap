@@ -33,6 +33,9 @@ import models.GameSession
 import models.Round
 import org.json.JSONObject
 
+// LOGIN INFORMATION FOR TEMPORARY FIREBASE ACCOUNT THAT WAS CREATED:
+// user: CorsiTapping@gmail.com
+// pass: corsi2019
 
 class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button

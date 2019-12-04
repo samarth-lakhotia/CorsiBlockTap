@@ -15,6 +15,10 @@ import android.widget.Button
 
 import kotlinx.android.synthetic.main.activity_main.*
 
+// LOGIN INFORMATION FOR TEMPORARY FIREBASE ACCOUNT THAT WAS CREATED:
+// user: CorsiTapping@gmail.com
+// pass: corsi2019
+
 class MainActivity : AppCompatActivity() {
     private lateinit var playButton: Button
     private lateinit var settingsButton:Button
