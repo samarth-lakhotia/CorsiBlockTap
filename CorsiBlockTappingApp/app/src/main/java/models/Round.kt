@@ -2,6 +2,8 @@ package models
 
 import android.annotation.SuppressLint
 import com.example.corsiblocktappingapp.Constants
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -70,5 +72,20 @@ class Round(roundNumber: Int, blocksToRemember: Int, patternToRemember: HashSet<
         var roundDetails = ""
         userTaps.forEach{ roundDetails+=it.toString()}
         return """{"Round Number":"${roundNumber}","Number of Blocks to memorize":"${numBlocksToRemember}","Tries Used":"${Constants.NUMBER_OF_TRIES-numTriesLeft}","Tap Details":"${roundDetails}","Total Time Taken":"${totalTimeTaken}"}"""
+    }
+    fun toJSON(): JSONObject {
+        var jsonObject=JSONObject()
+        var tapsJSONArray = JSONArray()
+        userTaps.forEach {
+            var jsonArr=JSONArray()
+            it.forEach { tap -> jsonArr.put(tap.toJSON()) }
+            tapsJSONArray.put(jsonArr)
+        }
+        jsonObject.put("Round Number",roundNumber)
+        jsonObject.put("Number of Blocks to memorize", numBlocksToRemember)
+        jsonObject.put("Tries Used",Constants.NUMBER_OF_TRIES-numTriesLeft)
+        jsonObject.put("Total time Taken", totalTimeTaken)
+        jsonObject.put("Tap Details",tapsJSONArray)
+        return jsonObject
     }
 }

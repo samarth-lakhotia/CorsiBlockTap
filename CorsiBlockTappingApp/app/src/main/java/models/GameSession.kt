@@ -1,6 +1,8 @@
 package models
 
 import com.example.corsiblocktappingapp.DIFFICULTY
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.Serializable
 
 class GameSession(difficulty: DIFFICULTY): Serializable{
@@ -64,5 +66,16 @@ class GameSession(difficulty: DIFFICULTY): Serializable{
             roundsDetails+=it.toString()
         }
         return """${getNumberOfRoundsPlayed()},${difficultyOfGame},${roundsDetails},${totalTime}"""
+    }
+    fun toJSON(): JSONObject {
+        var jsonObject = JSONObject()
+        var jsonArray = JSONArray()
+        jsonObject.put("Number of Rounds Played",getNumberOfRoundsPlayed())
+        jsonObject.put("Total Time Taken", totalTime)
+        rounds.forEach {
+            jsonArray.put(it.toJSON())
+        }
+        jsonObject.put("Rounds", jsonArray)
+        return jsonObject
     }
 }

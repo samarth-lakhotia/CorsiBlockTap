@@ -42,5 +42,5 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="40dp"
-        android:text="How to play?\nUpon clicking the play button, you will see the computer draw out a pattern for you. Your task is to draw the same pattern that the computer drew for you. You get two tries to draw the correct pattern. If it is correct you proceed to the next round by clicking Next." />
+        android:text="@string/instructions" />
 </android.widget.RelativeLayout>

@@ -17,4 +17,6 @@
     <string name="choose_difficulty">Choose Difficulty</string>
     <string name="game_settings">Game Settings</string>
     <string name="back_to_home_page">Back to Home Page</string>
+    <string name="export_to_json">Export to JSON</string>
+    <string name="instructions">How to play?\nUpon clicking the play button, you will see the computer draw out a pattern for you. Your task is to draw the same pattern that the computer drew for you. You get two tries to draw the correct pattern. If it is correct you proceed to the next round by clicking Next.</string>
 </resources>

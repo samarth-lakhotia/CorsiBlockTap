@@ -247,7 +247,7 @@ class GameActivity : Activity() {
                 completeResults.putExtra("rounds", gameSession.getNumberOfRoundsPlayed())
                 Log.i("RESULTS",gameSession.toString())
                 completeResults.putExtra("GameData", gameSession.toString())
-
+                completeResults.putExtra("GameSessionJSON", gameSession.toJSON().toString())
                 // Pass the total time to the intent
                 completeResults.putExtra("TotalTime", mTimerTextView.text)
                 startActivity(completeResults)

@@ -6,32 +6,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import models.BlockTap
 
 import java.io.FileWriter
 import java.io.IOException
 import android.net.NetworkCapabilities
-import android.net.Network
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.os.Build
-import android.content.Context.CONNECTIVITY_SERVICE
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.util.JsonWriter
-import android.widget.Chronometer
-import models.GameSession
-import models.Round
-import org.json.JSONObject
 
 // LOGIN INFORMATION FOR TEMPORARY FIREBASE ACCOUNT THAT WAS CREATED:
 // user: CorsiTapping@gmail.com
@@ -40,13 +25,13 @@ import org.json.JSONObject
 class FinishActivity : AppCompatActivity() {
     private lateinit var playButton: Button
     private lateinit var finishText: TextView
-    private lateinit var csvButton: TextView
+    private lateinit var jsonButton: TextView
     private lateinit var firebaseButton: TextView
     private val csvHeader = "Round, Difficulty, Round Details, Additional Info"
     private lateinit var dbReference: DatabaseReference
 
     //Vars for the total time
-    private lateinit var totalTime:String
+    private lateinit var totalTime: String
     private lateinit var totalTimeTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,14 +40,12 @@ class FinishActivity : AppCompatActivity() {
 
         // receives the gameSession from the GameActivity
         val gameData = intent.getStringExtra("GameData")
+        val jsonString = intent.getStringExtra("GameSessionJSON")
 
-        // writes to /storage/emulated/0/Android/data/com.example.corsiblocktappingapp/files/MyFileStorage because
-        // getExternalStorageDirectory is now deprecated. This folder can be accessed via ES FileExplorer.
-        val fileWriter = FileWriter(getExternalFilesDir("MyFileStorage").toString() + "/DataFromSession.csv")
 
         finishText = findViewById(R.id.finish_text)
         playButton = findViewById(R.id.play_button)
-        csvButton = findViewById(R.id.csv_button)
+        jsonButton = findViewById(R.id.csv_button)
         firebaseButton = findViewById(R.id.firebase_button)
 
         //Getting Total time
@@ -81,38 +64,10 @@ class FinishActivity : AppCompatActivity() {
             startActivity(Intent(this, GameActivity::class.java))
         }
 
-        csvButton.text = "Export to csv"
+        jsonButton.text = getString(R.string.export_to_json)
         // writing the data from each round to a csv file
-        csvButton.setOnClickListener {
-            try {
-                //write the header
-                fileWriter.append(csvHeader)
-                fileWriter.append('\n')
-
-                //write the gameData
-                fileWriter.append(gameData.toString())
-
-                Log.i("CSV", "Wrote to CSV successfully!")
-                Toast.makeText(this, "Wrote to CSV successfully", Toast.LENGTH_LONG)
-                    .show()
-            } catch (e: Exception) {
-                // do this when any Exception is caught
-                Log.i("CSV", "Did not write to CSV successfully!")
-                Toast.makeText(this, "Did not write to CSV successfully", Toast.LENGTH_LONG)
-                    .show()
-                Log.i("CSV", e.printStackTrace().toString())
-            } finally {
-                try {
-                    fileWriter.flush()
-                    fileWriter.close()
-                } catch (e: IOException) {
-                    // if unable to flush or close successfully, log the info
-                    Log.i("CSV", "flushing/closing Error!")
-                    Toast.makeText(this, "Closing Error", Toast.LENGTH_LONG)
-                        .show()
-                    Log.i("CSV", e.printStackTrace().toString())
-                }
-            }
+        jsonButton.setOnClickListener {
+            writeJSONFile(jsonString)
         }
 
         // getting the reference to the FirebaseDatabase
@@ -133,14 +88,54 @@ class FinishActivity : AppCompatActivity() {
 
         // otherwise, show a toast telling the user to connect to WiFi
         if (!checkForNetwork(baseContext)) {
-            Toast.makeText(this, "Please connect to WiFi in order to upload data to Firebase", Toast.LENGTH_LONG)
+            Toast.makeText(
+                this,
+                "Please connect to WiFi in order to upload data to Firebase",
+                Toast.LENGTH_LONG
+            )
                 .show()
         }
     }
 
-    // a functoin that checks for wifi connection
+    private fun writeJSONFile(jsonString: String?) {
+
+        // writes to /storage/emulated/0/Android/data/com.example.corsiblocktappingapp/files/MyFileStorage because
+        // getExternalStorageDirectory is now deprecated. This folder can be accessed via ES FileExplorer.
+        val jsonFileWriter =
+            FileWriter(getExternalFilesDir("MyFileStorage").toString() + "/DataFromSession.json")
+
+        try {
+
+            jsonFileWriter.write(jsonString!!)
+            jsonFileWriter.flush()
+            jsonFileWriter.close()
+
+            Log.i("JSON", "Wrote to CSV successfully!")
+            Toast.makeText(this, "Wrote to JSON successfully", Toast.LENGTH_LONG)
+                .show()
+        } catch (e: Exception) {
+            // do this when any Exception is caught
+            Toast.makeText(this, "Did not write to CSV successfully", Toast.LENGTH_LONG)
+                .show()
+            Log.i("JSON", e.printStackTrace().toString())
+        } finally {
+            try {
+                jsonFileWriter.flush()
+                jsonFileWriter.close()
+            } catch (e: IOException) {
+                // if unable to flush or close successfully, log the info
+                Log.i("JSON", "flushing/closing Error!")
+                Toast.makeText(this, "Closing Error", Toast.LENGTH_LONG)
+                    .show()
+                Log.i("JSON", e.printStackTrace().toString())
+            }
+        }
+    }
+
+    // a function that checks for wifi connection
     private fun checkForNetwork(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         // if past API level 23, use the new method. Otherwise, use the deprecated method
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val nw = connectivityManager.activeNetwork ?: return false
@@ -155,8 +150,5 @@ class FinishActivity : AppCompatActivity() {
     override fun onBackPressed() {
         startActivity(Intent(this, MainActivity::class.java))
     }
-    fun getJSON(){
-        var jsobj=JSONObject()
-        jsobj.put("Session", {})
-    }
+    
 }
