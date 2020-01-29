@@ -158,24 +158,29 @@ class GameActivity : Activity() {
         unlockAllBlocks(false)
 
 
-
+        var delay = 0
         // If this method has been called as a restart of the current round, this means that the user
         // has entered the wrong pattern for the current round and can try again
         if (!restart) {
             gameSession.addRound(patternToMatch)
         }
+        else{
+            delay = 2000
+        }
+        var handle = Handler()
+        handle.postDelayed({
+            iter = patternToMatch.iterator();
 
+            // Update the number of tries left for the current round
+            gameSession.tryRound();
+
+            // Update the text view with the new value
+            setNumberOfTries(gameSession.getNumberOfTriesLeftForCurrentRound());
+
+            // Call this method that taps the blocks mentioned in the pattern
+            tapBlocks(patternToMatch)}, delay.toLong());
         // Iterator for the current pattern
-        iter = patternToMatch.iterator()
 
-        // Update the number of tries left for the current round
-        gameSession.tryRound()
-
-        // Update the text view with the new value
-        setNumberOfTries(gameSession.getNumberOfTriesLeftForCurrentRound())
-
-        // Call this method that taps the blocks mentioned in the pattern
-        tapBlocks(patternToMatch)
     }
 
     private fun tapBlocks(patternToMatch: HashSet<Int>) {
@@ -297,8 +302,15 @@ class GameActivity : Activity() {
 
         val wasItCorrectlyTapped = gameSession.addTap(position, milliRoundTime)
         return if (!wasItCorrectlyTapped) {
-            Toast.makeText(this, "Incorrect Sequence", Toast.LENGTH_LONG)
+            if(gameSession.getTheLatestRound().areThereTriesLeft()){
+                Toast.makeText(this, "Incorrect Sequence.. Try Again", Toast.LENGTH_SHORT)
                 .show()
+            }
+            else{
+                Toast.makeText(this, "Incorrect Sequence. Game Ending...", Toast.LENGTH_LONG)
+                    .show()
+            }
+
             false
         } else {
             if (gameSession.checkIfUserWonCurrentRound())

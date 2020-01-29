@@ -2,17 +2,17 @@ package com.example.corsiblocktappingapp
 
 enum class DIFFICULTY {
     EASY_DIFFICULTY {
-        override var INITIAL_BLOCKS_TO_REMEMBER = 3
+        override var INITIAL_BLOCKS_TO_REMEMBER = 1
         override var id=0
         override var NUMBER_OF_BLOCKS = 20
     },
     MEDIUM_DIFFICULTY {
-        override var INITIAL_BLOCKS_TO_REMEMBER = 4
+        override var INITIAL_BLOCKS_TO_REMEMBER = 1
         override var id=1
-        override var NUMBER_OF_BLOCKS = 25
+        override var NUMBER_OF_BLOCKS = 30
     },
     HARD_DIFFICULTY {
-        override var INITIAL_BLOCKS_TO_REMEMBER = 5
+        override var INITIAL_BLOCKS_TO_REMEMBER = 1
         override var id=2
         override var NUMBER_OF_BLOCKS = 25
     };
