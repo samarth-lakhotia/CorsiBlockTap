@@ -158,7 +158,7 @@ class GameActivity : Activity() {
         unlockAllBlocks(false)
 
 
-        var delay = 0
+        var delay = 1000
         // If this method has been called as a restart of the current round, this means that the user
         // has entered the wrong pattern for the current round and can try again
         if (!restart) {
